@@ -1,0 +1,37 @@
+version: "3"
+
+services:
+  db:
+    image: postgres:14.1
+    restart: always
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    volumes:
+      - db:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  web:
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile
+    restart: always
+    command: uvicorn statusPulse.asgi:application --host 0.0.0.0 --port 8000 --reload
+
+    tty: true
+    stdin_open: true
+    depends_on:
+      - db
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+
+volumes:
+  db:
+    driver: local
