@@ -4,10 +4,9 @@ RUN mkdir /app
 
 WORKDIR /app
 
-COPY requirements.txt /app/
+COPY ./build/requirements.dev.txt /app/
+COPY ./build/requirements.txt /app/
 
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN pip install --upgrade pip && pip install -r requirements.dev.txt
 
 COPY ./app/ /app/
-
-EXPOSE 8000
