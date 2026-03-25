@@ -8,9 +8,19 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - "${DB_PORT}:5432"
     volumes:
       - db:/var/lib/postgresql/data
+    env_file:
+      - .env
+
+  redis:
+    image: redis:7.0.5
+    restart: always
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
     env_file:
       - .env
 
@@ -32,6 +42,19 @@ services:
     volumes:
       - ./app:/app
 
+  celery:
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile
+    depends_on:
+      - db
+      - redis
+      - web
+    command: celery -A statusPulse worker -E -l info
+    volumes:
+      - ./app:/app
+
 volumes:
   db:
     driver: local
+  redis_data:
