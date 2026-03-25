@@ -16,6 +16,8 @@ fi
 
 source venv/bin/activate
 
-pip install -r build/requirements.dev.txt
+pip install -r build/requirements-dev.in
+
+pip-compile build/requirements-dev.in -o build/requirements-dev.txt
 
 pre-commit install

@@ -5,3 +5,4 @@ __pycache__/
 *.pyc
 ./mypy_cache/
 ./.mypy_cache/
+requirements*.txt

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+source venv/bin/activate
+
+pip-compile build/requirements-dev.in -o build/requirements-dev.txt $@
+pip-compile build/requirements.in -o build/requirements.txt $@
