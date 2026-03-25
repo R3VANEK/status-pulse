@@ -51,6 +51,25 @@ services:
       - redis
       - web
     command: celery -A statusPulse worker -E -l info
+    env_file:
+      - .env
+    volumes:
+      - ./app:/app
+
+  flower:
+    build:
+      context: .
+      dockerfile: ./build/Dockerfile
+    depends_on:
+      - db
+      - redis
+      - web
+      - celery
+    command: celery -A statusPulse flower --port=5555
+    ports:
+      - "${FLOWER_PORT}:5555"
+    env_file:
+      - .env
     volumes:
       - ./app:/app
 

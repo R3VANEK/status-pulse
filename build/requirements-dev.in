@@ -7,3 +7,4 @@ ruff==0.15.7
 mypy==1.19.1
 django-stubs[compatible-mypy]
 pip-tools==7.5.3
+flower==2.0.1
