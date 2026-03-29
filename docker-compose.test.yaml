@@ -18,7 +18,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: ./build/Dockerfile
+      dockerfile: ./build/test.Dockerfile
     depends_on:
       db:
         condition: service_healthy
