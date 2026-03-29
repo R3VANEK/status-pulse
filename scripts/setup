@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+set -e
+
+if command -v python3 &>/dev/null; then
+    PYTHON=python3
+else
+    PYTHON=python
+fi
+
 if [ ! -f .env ]
 then
     echo "Creating .env file from .env.copy..."
@@ -11,13 +19,16 @@ fi
 if [ ! -d venv ]
 then
     echo "Creating virtual environment..."
-    python3 -m venv venv
+    $PYTHON -m venv venv
 fi
 
 source venv/bin/activate
 
-pip install -r build/requirements-dev.in
+pip install --upgrade pip-tools
 
+pip-compile build/requirements.in -o build/requirements.txt
 pip-compile build/requirements-dev.in -o build/requirements-dev.txt
+
+pip install -r build/requirements-dev.txt
 
 pre-commit install

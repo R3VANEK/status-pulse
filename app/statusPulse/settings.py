@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_celery_beat",
     "django_celery_results",
+    "demo",
 ]
 
 MIDDLEWARE = [
@@ -82,6 +83,9 @@ DATABASES = {
         "PASSWORD": os.environ.get("DB_PASSWORD"),
         "HOST": "db",
         "PORT": os.environ.get("DB_PORT"),
+        "TEST": {
+            "MIGRATE": False,
+        },
     }
 }
 

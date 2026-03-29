@@ -1,0 +1,36 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:14.1
+    environment:
+      POSTGRES_DB: test_db
+      POSTGRES_USER: test_user
+      POSTGRES_PASSWORD: test_pass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test_user"]
+      interval: 5s
+      retries: 5
+
+  redis:
+    image: redis:7.0.5
+
+  web:
+    build:
+      context: .
+      dockerfile: ./build/test.Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      DB_NAME: test_db
+      DB_USER: test_user
+      DB_PASSWORD: test_pass
+      DB_HOST: db
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - ./app:/app

@@ -1,0 +1,17 @@
+[run]
+branch = True
+plugins =
+    django_coverage_plugin
+
+
+[report]
+omit =
+    */migrations/*
+    */tests/*
+    statusPulse/*
+    manage.py
+
+fail_under = 0
+show_missing = True
+skip_covered = True
+skip_empty = True

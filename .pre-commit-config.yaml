@@ -18,6 +18,7 @@ repos:
     hooks:
       - id: mypy
         args: [--strict]
+        exclude: "[a-zA-Z]*/(migrations)/(.)*"
         additional_dependencies:
           - celery==5.6.2
           - Django==5.2.11
@@ -26,3 +27,5 @@ repos:
           - django-celery-beat
           - django-celery-results
           - celery-types
+    env:
+      PYTHONPATH: "app"
