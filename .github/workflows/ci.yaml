@@ -15,10 +15,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y docker-compose
 
       - name: Build image
-        run: docker-compose -f docker-compose.test.yml build
+        run: docker-compose -f ./docker-compose.test.yml build
 
       - name: Run Ruff
-        run: docker-compose -f docker-compose.test.yml run --no-deps --rm web ruff check .
+        run: docker-compose -f ./docker-compose.test.yml run --no-deps --rm web ruff check .
 
   test:
     runs-on: ubuntu-latest
