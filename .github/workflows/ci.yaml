@@ -19,7 +19,7 @@ jobs:
       - name: Run Ruff
         run: docker-compose -f docker-compose.test.yaml run --no-deps --rm web ruff check .
 
-  test:
+  tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -34,4 +34,21 @@ jobs:
       - name: Run tests
         run: |
           docker-compose -f docker-compose.test.yaml run --rm web \
-          sh -c "python manage.py migrate && coverage run manage.py test --parallel --durations=10 && coverage report"
+          sh -c "python manage.py migrate && coverage run manage.py test --parallel --durations=10 && coverage combine && coverage report"
+
+  migrations:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Docker Compose
+        run: sudo apt-get update && sudo apt-get install -y docker-compose
+
+      - name: Build image
+        run: docker-compose -f docker-compose.test.yaml build
+
+      - name: Check migrations
+        run: |
+          docker-compose -f docker-compose.test.yaml run --rm web \
+          sh -c "python manage.py makemigrations --check --dry-run"
