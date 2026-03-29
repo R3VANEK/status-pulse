@@ -13,7 +13,7 @@ RUN apt-get update && \
 
 COPY ./build/requirements.in /app/
 COPY ./build/requirements-dev.in /app/
-COPY ./coveragerc /app/
+COPY ./.coveragerc /app/
 
 RUN pip install --upgrade pip && \
     pip install pip-tools && \
