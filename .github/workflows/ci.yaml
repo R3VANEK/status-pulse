@@ -34,4 +34,4 @@ jobs:
       - name: Run tests
         run: |
           docker-compose -f docker-compose.test.yaml run --rm web \
-          sh -c "python manage.py migrate && pytest --cov=app --cov-report=term --cov-report=xml"
+          sh -c "python manage.py migrate && coverage run manage.py test --parallel --durations=10 && coverage report"
