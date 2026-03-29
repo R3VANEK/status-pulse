@@ -11,10 +11,12 @@ RUN apt-get update && \
         gcc \
     && rm -rf /var/lib/apt/lists/*
 
+COPY ./build/requirements.in /app/
 COPY ./build/requirements-dev.in /app/
 
 RUN pip install --upgrade pip && \
     pip install pip-tools && \
+    pip-compile requirements.in && \
     pip-compile requirements-dev.in && \
     pip install --no-cache-dir -r requirements-dev.txt
 
