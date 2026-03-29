@@ -35,9 +35,9 @@ jobs:
         run: |
           docker-compose -f docker-compose.test.yaml run --rm web \
           sh -c "python manage.py migrate && \
-          coverage run --rcfile=/app/.coveragerc --parallel-mode manage.py test --durations=10 && \
-          coverage combine --rcfile=/app/.coveragerc && \
-          coverage report --rcfile=/app/.coveragerc && \
+          coverage run  --parallel-mode manage.py test --durations=10 && \
+          coverage combine  && \
+          coverage report  && \
           coverage debug config"
 
   migrations:
