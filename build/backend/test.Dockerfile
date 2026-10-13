@@ -20,7 +20,7 @@ RUN pip install --upgrade pip && \
     pip-compile requirements-dev.in && \
     pip install --no-cache-dir -r requirements-dev.txt
 
-COPY ./app/ /app/
+COPY ../backend/ /app/
 
 COPY ./build/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh

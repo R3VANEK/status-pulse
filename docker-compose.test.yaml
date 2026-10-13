@@ -15,7 +15,7 @@ services:
   redis:
     image: redis:7.0.5
 
-  web:
+  api:
     build:
       context: .
       dockerfile: ./build/test.Dockerfile
@@ -33,4 +33,4 @@ services:
       REDIS_HOST: redis
       REDIS_PORT: 6379
     volumes:
-      - ./app:/app
+      - ./backend:/app

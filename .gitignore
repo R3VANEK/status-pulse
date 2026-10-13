@@ -7,6 +7,11 @@ __pycache__/
 ./.mypy_cache/
 requirements*.txt
 .coverage
+.env
 .ruff_cache/
 htmlcov/
 .mypy_cache/
+
+# Frontend settings
+package-lock.json
+node_modules
