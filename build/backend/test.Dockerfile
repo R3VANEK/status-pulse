@@ -8,7 +8,7 @@ RUN mkdir /app
 
 WORKDIR /app
 
-COPY ./build/backend/entrypoint.sh /entrypoint.sh
+COPY --chmod=755 ./build/backend/entrypoint.sh /entrypoint.sh
 
 COPY ./build/backend/requirements-dev.txt /app/
 

@@ -43,6 +43,6 @@ populate: ## Flush old data and populate fresh test data
 REFRESH_DB ?= true
 
 test: ## invoke tests e.g make test -k "test_my_awesome_example"
-	docker compose -f docker-compose.test.yaml up -d
-	docker compose -f docker-compose.test.yaml exec api pytest --refresh-db=$(REFRESH_DB) $(ARGS)
-	docker compose -f docker-compose.test.yaml down
+	docker compose -p status-pulse-test -f docker-compose.test.yaml up -d
+	docker compose -p status-pulse-test -f docker-compose.test.yaml exec api pytest --refresh-db=$(REFRESH_DB) $(ARGS)
+	docker compose -p status-pulse-test -f docker-compose.test.yaml down
