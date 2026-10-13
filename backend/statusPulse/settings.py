@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.environ.get("SECRET_KEY", "123")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG")
@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_celery_beat",
     "django_celery_results",
+    "rest_framework",
+    "drf_spectacular",
     "demo",
 ]
 
@@ -78,13 +80,14 @@ WSGI_APPLICATION = "statusPulse.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("DB_NAME"),
-        "USER": os.environ.get("DB_USER"),
-        "PASSWORD": os.environ.get("DB_PASSWORD"),
+        "NAME": os.environ.get("DB_NAME", "statusPulse"),
+        "USER": os.environ.get("DB_USER", "postgres"),
+        "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
         "HOST": "db",
-        "PORT": os.environ.get("DB_PORT"),
+        "PORT": "5434",
         "TEST": {
-            "MIGRATE": False,
+            "MIGRATE": True,
+            "NAME": "test_statuspulse",
         },
     }
 }
@@ -108,6 +111,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/

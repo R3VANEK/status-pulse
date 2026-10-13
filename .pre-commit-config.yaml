@@ -28,5 +28,9 @@ repos:
           - django-celery-beat
           - django-celery-results
           - celery-types
+          - djangorestframework
+          - drf-spectacular
+          - djangorestframework-stubs
+          - factory-boy
     env:
       PYTHONPATH: "backend"

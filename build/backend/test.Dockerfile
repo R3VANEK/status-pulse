@@ -1,28 +1,23 @@
 FROM python:3.13-slim
 
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE 1
+
+ENV PYTHONUNBUFFERED 1
+
+RUN mkdir /app
 
 WORKDIR /app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-        postgresql-client \
-        gcc \
-    && rm -rf /var/lib/apt/lists/*
+COPY ./build/backend/entrypoint.sh /entrypoint.sh
 
-COPY ./build/requirements.in /app/
-COPY ./build/requirements-dev.in /app/
+COPY ./build/backend/requirements-dev.txt /app/
 
-RUN pip install --upgrade pip && \
-    pip install pip-tools && \
-    pip-compile requirements.in && \
-    pip-compile requirements-dev.in && \
-    pip install --no-cache-dir -r requirements-dev.txt
+RUN apt-get update && apt-get install -y postgresql-client && rm -rf /var/lib/apt/lists/*
 
-COPY ../backend/ /app/
+RUN pip install --upgrade pip
 
-COPY ./build/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN pip install -r requirements-dev.txt
+
+COPY ./backend/ /app/
 
 ENTRYPOINT ["/entrypoint.sh"]
