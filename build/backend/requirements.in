@@ -6,3 +6,5 @@ gunicorn==25.0.3
 redis[hiredis]==7.4.0
 django-celery-beat==2.9.0
 django-celery-results==2.4.0
+djangorestframework==3.18.3
+drf-spectacular==0.30.0

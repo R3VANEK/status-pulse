@@ -1,6 +1,0 @@
-#!/usr/bin/env bash
-
-
-# later add here named parameter mode, different DockerFile for dev and docker-compose for dev
-docker compose down --remove-orphans
-docker compose up $@

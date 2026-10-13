@@ -2,15 +2,22 @@ version: "3"
 
 services:
   db:
-    image: postgres:14.1
-    restart: always
+    image: postgres:18.6
+    restart: unless-stopped
+    user: postgres
     environment:
+      - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
-      - "${DB_PORT}:5432"
+      - "5434:5434"
     volumes:
-      - db:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     env_file:
       - .env
 
@@ -24,10 +31,10 @@ services:
     env_file:
       - .env
 
-  web:
+  api:
     build:
       context: .
-      dockerfile: ./build/Dockerfile
+      dockerfile: ./build/backend/Dockerfile
     restart: always
     command: uvicorn statusPulse.asgi:application --host 0.0.0.0 --port 8000 --reload
 
@@ -40,30 +47,30 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./app:/app
+      - ./backend:/app
 
   celery:
     build:
       context: .
-      dockerfile: ./build/Dockerfile
+      dockerfile: ./build/backend/Dockerfile
     depends_on:
       - db
       - redis
-      - web
+      - api
     command: celery -A statusPulse worker -E -l info
     env_file:
       - .env
     volumes:
-      - ./app:/app
+      - ./backend:/app
 
   flower:
     build:
       context: .
-      dockerfile: ./build/Dockerfile
+      dockerfile: ./build/backend/Dockerfile
     depends_on:
       - db
       - redis
-      - web
+      - api
       - celery
     command: celery -A statusPulse flower --port=5555
     ports:
@@ -71,9 +78,10 @@ services:
     env_file:
       - .env
     volumes:
-      - ./app:/app
+      - ./backend:/app
 
 volumes:
   db:
     driver: local
   redis_data:
+  postgres_data:
