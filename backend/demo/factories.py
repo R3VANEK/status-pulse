@@ -1,7 +1,8 @@
 from factory.django import DjangoModelFactory
 from demo.models import Program
-from uuid import uuid4
 import factory
+
+from uuid import uuid4
 
 
 class ProgramFactory(DjangoModelFactory[Program]):
