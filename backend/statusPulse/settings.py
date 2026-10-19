@@ -84,7 +84,7 @@ DATABASES = {
         "USER": os.environ.get("DB_USER", "postgres"),
         "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
         "HOST": "db",
-        "PORT": "5434",
+        "PORT": "5432",
         "TEST": {
             "MIGRATE": True,
             "NAME": "test_statuspulse",
