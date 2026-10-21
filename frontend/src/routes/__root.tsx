@@ -1,11 +1,10 @@
-import * as React from "react";
 import { Link } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 import { createRootRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createRootRoute({
-  component: () => <Outlet />,
+  component: RootComponent,
 });
 
 function RootComponent() {
@@ -36,3 +35,5 @@ function RootComponent() {
     </>
   );
 }
+
+export default RootComponent;
