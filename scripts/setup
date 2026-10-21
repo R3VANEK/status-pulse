@@ -26,9 +26,9 @@ source venv/bin/activate
 
 pip install --upgrade pip-tools
 
-pip-compile build/requirements.in -o build/requirements.txt
-pip-compile build/requirements-dev.in -o build/requirements-dev.txt
+pip-compile build/backend/requirements.in -o build/backend/requirements.txt
+pip-compile build/backend/requirements-dev.in -o build/backend/requirements-dev.txt
 
-pip install -r build/requirements-dev.txt
+pip install -r build/backend/requirements-dev.txt
 
 pre-commit install

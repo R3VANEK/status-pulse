@@ -42,11 +42,13 @@ INSTALLED_APPS = [
     "django_celery_results",
     "rest_framework",
     "drf_spectacular",
+    "corsheaders",
     "demo",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -84,7 +86,7 @@ DATABASES = {
         "USER": os.environ.get("DB_USER", "postgres"),
         "PASSWORD": os.environ.get("DB_PASSWORD", "postgres"),
         "HOST": "db",
-        "PORT": "5434",
+        "PORT": "5432",
         "TEST": {
             "MIGRATE": True,
             "NAME": "test_statuspulse",
@@ -115,6 +117,17 @@ AUTH_PASSWORD_VALIDATORS = [
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+# CORS
+# https://github.com/adamchainz/django-cors-headers#setup
+# Comma separated list of origins allowed to call the API from a browser.
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:3000").split(
+        ","
+    )
+    if origin.strip()
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/

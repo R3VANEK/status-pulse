@@ -33,8 +33,8 @@ shell: ## Open the Django shell inside the API container
 	docker compose exec api python manage.py shell
 
 compile_requirements: ## Compile production and development requirements
-	pip-compile .\build\backend\requirements.in -o .\build\backend\requirements.txt
-	pip-compile .\build\backend\requirements-dev.in -o .\build\backend\requirements-dev.txt
+	pip-compile ./build/backend/requirements.in -o ./build/backend/requirements.txt
+	pip-compile ./build/backend/requirements-dev.in -o ./build/backend/requirements-dev.txt
 
 populate: ## Flush old data and populate fresh test data
 	docker compose exec api python manage.py flush --noinput

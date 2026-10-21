@@ -10,7 +10,7 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
-      - "5434:5434"
+      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql
     healthcheck:
@@ -48,6 +48,26 @@ services:
       - "8000:8000"
     volumes:
       - ./backend:/app
+
+  front:
+    build:
+      context: .
+      dockerfile: ./build/frontend/Dockerfile
+    depends_on:
+      - api
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    environment:
+      HOST: "0.0.0.0"
+      PORT: "3000"
+      CHOKIDAR_USEPOLLING: "true"
+      FAST_REFRESH: "true"
+      CHOKIDAR_INTERVAL: "1000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
 
   celery:
     build:
