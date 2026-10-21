@@ -5,4 +5,4 @@ WORKDIR /app
 COPY ./frontend/package*.json ./
 RUN npm ci
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "dev"]
