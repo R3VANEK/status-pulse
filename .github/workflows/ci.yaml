@@ -1,7 +1,14 @@
 name: CI
 
 on:
+  push:
+    branches:
+      - main
+      - feature
+      - "feature/**"
   pull_request:
+    branches:
+      - main
 
 jobs:
   be-lint:
@@ -67,63 +74,6 @@ jobs:
 
       - name: Run TypeScript type check
         run: npm run typecheck
-
-  tests:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Docker Compose
-        run: sudo apt-get update && sudo apt-get install -y docker-compose
-
-      - name: Build image
-        run: docker-compose -f docker-compose.test.yaml build
-
-      - name: Run tests
-        run: |
-          docker-compose -f docker-compose.test.yaml run --rm api \
-          sh -c "python manage.py migrate && \
-          coverage run  --parallel-mode manage.py test --durations=10 && \
-          coverage combine  && \
-          coverage report"
-
-  migrations:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Docker Compose
-        run: sudo apt-get update && sudo apt-get install -y docker-compose
-
-      - name: Build image
-        run: docker-compose -f docker-compose.test.yaml build
-
-      - name: Check migrations
-        run: |
-          docker-compose -f docker-compose.test.yaml run --rm api \
-          sh -c "python manage.py makemigrations --check --dry-run"
-name: CI
-
-on:
-  pull_request:
-
-jobs:
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Docker Compose
-        run: sudo apt-get update && sudo apt-get install -y docker-compose
-
-      - name: Build image
-        run: docker-compose -f docker-compose.test.yaml build
-
-      - name: Run Ruff
-        run: docker-compose -f docker-compose.test.yaml run --no-deps --rm api ruff check .
 
   tests:
     runs-on: ubuntu-latest
