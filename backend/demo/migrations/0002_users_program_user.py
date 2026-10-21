@@ -5,22 +5,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('demo', '0001_initial'),
+        ("demo", "0001_initial"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Users',
+            name="Users",
             fields=[
-                ('id', models.BigIntegerField(primary_key=True, serialize=False)),
-                ('email', models.EmailField(default='foo@example.com', max_length=254)),
+                ("id", models.BigIntegerField(primary_key=True, serialize=False)),
+                ("email", models.EmailField(default="foo@example.com", max_length=254)),
             ],
         ),
         migrations.AddField(
-            model_name='program',
-            name='user',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='demo.users'),
+            model_name="program",
+            name="user",
+            field=models.ForeignKey(
+                null=True, on_delete=django.db.models.deletion.CASCADE, to="demo.users"
+            ),
         ),
     ]
