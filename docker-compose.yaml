@@ -52,7 +52,7 @@ services:
   front:
     build:
       context: .
-      dockerfile: ./build/frontend/Dockerfile
+      dockerfile: ./build/frontend/Dockerfile1
     depends_on:
       - api
     env_file:
