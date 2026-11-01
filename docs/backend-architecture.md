@@ -89,3 +89,7 @@ The presentation layer exposes the API through DRF views and serializers, transl
 ### 4. Handling constants and env variables
 
 If you come across some arbitrary variable whos value influences logic in some way e.g. cache ttl, pagination size etc. Include it in the `settings.py` grouped under the comment telling from which django app it is derived and with a small comment on what it does
+
+### 5. Returning data
+
+API endpoints must always return data in JSON format. If some kind of error occurs, user must be informed about it via HTTP error code, and the JSON payload has property `details` with string description of error
