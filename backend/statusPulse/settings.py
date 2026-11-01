@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 """
@@ -43,7 +44,12 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
+    "allauth",
+    "allauth.account",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "demo",
+    "accounts",
 ]
 
 MIDDLEWARE = [
@@ -55,6 +61,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "statusPulse.urls"
@@ -75,6 +83,21 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "statusPulse.wsgi.application"
+
+# Custom user model (email instead of username), see accounts/infrastructure/models.py
+AUTH_USER_MODEL = "accounts.User"
+
+# Migrations of the accounts app live in the infrastructure layer (DDD)
+MIGRATION_MODULES = {
+    "accounts": "accounts.infrastructure.migrations",
+}
+
+AUTHENTICATION_BACKENDS = [
+    # Standard Django login (used by the /admin panel)
+    "django.contrib.auth.backends.ModelBackend",
+    # allauth login, e.g. by email
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
 
 
 # Database
@@ -116,6 +139,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
 }
 
 # CORS
@@ -153,3 +179,26 @@ CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
 
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
+
+# accounts app settings
+
+# allauth: https://docs.allauth.org/en/latest/account/configuration.html
+# Users sign up and log in with email + password, there is no username.
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+# Account can be used right away, email confirmation is not required (no mail server yet).
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
+# simplejwt: https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+SIMPLE_JWT = {
+    # How long an access token is valid. Short, so a leaked token expires quickly.
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    # How long a refresh token is valid. After that the user has to log in again.
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    # /refresh also returns a new refresh token and blacklists the old one.
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    # Expected header format: "Authorization: Bearer <token>".
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
