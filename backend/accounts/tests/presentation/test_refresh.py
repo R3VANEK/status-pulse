@@ -22,7 +22,7 @@ class RefreshEndpointTests(APITestCase):
         self.tokens = response.data
         self.user = UserModel.objects.get(email="jan@example.com")
 
-    def refresh(self, token: str, **extra: str):  # type: ignore[no-untyped-def]
+    def refresh(self, token: str, **extra: str):
         return self.client.post(URL, {"refresh": token}, format="json", **extra)
 
     def test_returns_new_token_pair(self) -> None:

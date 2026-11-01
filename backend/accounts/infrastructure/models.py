@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, ClassVar
 
 from django.contrib.auth.models import (
     AbstractBaseUser,
@@ -9,7 +9,7 @@ from django.db import models
 from django.utils import timezone
 
 
-class UserManager(BaseUserManager):  # type: ignore[type-arg]
+class UserManager(BaseUserManager["User"]):
     """Creates users identified by email instead of username."""
 
     use_in_migrations = True
@@ -20,7 +20,7 @@ class UserManager(BaseUserManager):  # type: ignore[type-arg]
         if not email:
             raise ValueError("Email is required")
         email = self.normalize_email(email)
-        user: User = self.model(email=email, **extra_fields)
+        user = self.model(email=email, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -43,7 +43,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     USERNAME_FIELD = "email"
     EMAIL_FIELD = "email"
-    REQUIRED_FIELDS: list[str] = []
+    REQUIRED_FIELDS: ClassVar[list[str]] = []
 
     def __str__(self) -> str:
         return self.email

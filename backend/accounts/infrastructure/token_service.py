@@ -11,6 +11,8 @@ from accounts.infrastructure.models import User as UserModel
 
 class SimpleJwtTokenService(TokenService):
     def issue_for(self, user: User) -> TokenPair:
+        if user.id is None:
+            raise ValueError("Cannot issue tokens for a user that is not saved yet.")
         model = UserModel.objects.get(pk=user.id)
         refresh = RefreshToken.for_user(model)
         return TokenPair(access=str(refresh.access_token), refresh=str(refresh))
