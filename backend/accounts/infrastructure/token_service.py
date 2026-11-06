@@ -5,7 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.application.interfaces import TokenPair, TokenService
 from accounts.domain.entities import User
-from accounts.domain.exceptions import InvalidToken
+from accounts.domain.exceptions import InvalidTokenException
 from accounts.infrastructure.models import User as UserModel
 
 
@@ -24,7 +24,7 @@ class SimpleJwtTokenService(TokenService):
         try:
             serializer.is_valid(raise_exception=True)
         except (TokenError, APIException) as error:
-            raise InvalidToken() from error
+            raise InvalidTokenException() from error
 
         data = serializer.validated_data
         return TokenPair(

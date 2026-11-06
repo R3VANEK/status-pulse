@@ -13,4 +13,6 @@ class RefreshTokens:
         self._tokens = tokens
 
     def execute(self, command: RefreshTokensCommand) -> TokenPair:
-        return self._tokens.refresh(command.refresh_token)  # raises InvalidToken
+        return self._tokens.refresh(
+            command.refresh_token
+        )  # raises InvalidTokenException

@@ -7,7 +7,7 @@ from accounts.application.interfaces import (
     UserRepository,
 )
 from accounts.domain.entities import User
-from accounts.domain.exceptions import InvalidToken, WeakPassword
+from accounts.domain.exceptions import InvalidTokenException, WeakPasswordException
 from accounts.domain.value_objects import Email
 
 
@@ -34,7 +34,7 @@ class InMemoryUserRepository(UserRepository):
 class MinLengthPasswordPolicy(PasswordPolicy):
     def validate(self, password: str, email: Email) -> None:
         if len(password) < 8:
-            raise WeakPassword(["Too short."])
+            raise WeakPasswordException(["Too short."])
 
 
 class FakeTokenService(TokenService):
@@ -49,7 +49,7 @@ class FakeTokenService(TokenService):
 
     def refresh(self, refresh_token: str) -> TokenPair:
         if refresh_token not in self.valid_refresh_tokens:
-            raise InvalidToken()
+            raise InvalidTokenException()
         # rotation: the used refresh token stops being valid
         self.valid_refresh_tokens.remove(refresh_token)
         return self._issue_pair()

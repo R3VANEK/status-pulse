@@ -1,6 +1,6 @@
 from django.test import SimpleTestCase
 
-from accounts.domain.exceptions import InvalidEmail
+from accounts.domain.exceptions import InvalidEmailException
 from accounts.domain.value_objects import Email
 
 
@@ -22,7 +22,7 @@ class EmailTests(SimpleTestCase):
             "jan kowalski@example.com",
         ]:
             with self.subTest(invalid=invalid):
-                with self.assertRaises(InvalidEmail):
+                with self.assertRaises(InvalidEmailException):
                     Email(invalid)
 
     def test_is_immutable(self) -> None:

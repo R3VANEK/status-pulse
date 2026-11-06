@@ -4,7 +4,7 @@ from django.db import IntegrityError, transaction
 
 from accounts.application.interfaces import UserRepository
 from accounts.domain.entities import User
-from accounts.domain.exceptions import EmailAlreadyTaken
+from accounts.domain.exceptions import EmailAlreadyTakenException
 from accounts.domain.value_objects import Email
 from accounts.infrastructure.models import User as UserModel
 
@@ -29,7 +29,7 @@ class DjangoUserRepository(UserRepository):
                 )
         except IntegrityError as error:
             # Another request registered the same email in the meantime.
-            raise EmailAlreadyTaken(email.value) from error
+            raise EmailAlreadyTakenException(email.value) from error
         return self._to_entity(model)
 
     def get_by_credentials(self, email: Email, password: str) -> User | None:

@@ -1,7 +1,10 @@
 from dataclasses import dataclass
 
 from accounts.application.interfaces import TokenPair, TokenService, UserRepository
-from accounts.domain.exceptions import InvalidCredentials, InvalidEmail
+from accounts.domain.exceptions import (
+    InvalidCredentialsException,
+    InvalidEmailException,
+)
 from accounts.domain.value_objects import Email
 
 
@@ -19,12 +22,12 @@ class LogInUser:
     def execute(self, command: LogInUserCommand) -> TokenPair:
         try:
             email = Email(command.email)
-        except InvalidEmail:
+        except InvalidEmailException:
             # Do not reveal which part was wrong.
-            raise InvalidCredentials() from None
+            raise InvalidCredentialsException() from None
 
         user = self._users.get_by_credentials(email, command.password)
         if user is None or not user.is_active:
-            raise InvalidCredentials()
+            raise InvalidCredentialsException()
 
         return self._tokens.issue_for(user)

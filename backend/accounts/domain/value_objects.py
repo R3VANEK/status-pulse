@@ -1,7 +1,7 @@
 import re
 from dataclasses import dataclass
 
-from accounts.domain.exceptions import InvalidEmail
+from accounts.domain.exceptions import InvalidEmailException
 
 # Simple sanity check: something@something.something, no spaces.
 # Full RFC validation is not the goal here.
@@ -15,7 +15,7 @@ class Email:
     def __post_init__(self) -> None:
         normalized = self.value.strip().lower()
         if not _EMAIL_PATTERN.fullmatch(normalized):
-            raise InvalidEmail(self.value)
+            raise InvalidEmailException(self.value)
         # frozen dataclass blocks normal assignment, so we bypass it once, during creation
         object.__setattr__(self, "value", normalized)
 

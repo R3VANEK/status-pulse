@@ -5,7 +5,7 @@ from accounts.application.use_cases.refresh_tokens import (
     RefreshTokensCommand,
 )
 from accounts.domain.entities import User
-from accounts.domain.exceptions import InvalidToken
+from accounts.domain.exceptions import InvalidTokenException
 from accounts.domain.value_objects import Email
 from accounts.tests.application.fakes import FakeTokenService
 
@@ -25,9 +25,9 @@ class RefreshTokensTests(SimpleTestCase):
     def test_used_refresh_token_cannot_be_reused(self) -> None:
         self.use_case.execute(RefreshTokensCommand(self.initial.refresh))
 
-        with self.assertRaises(InvalidToken):
+        with self.assertRaises(InvalidTokenException):
             self.use_case.execute(RefreshTokensCommand(self.initial.refresh))
 
     def test_rejects_unknown_token(self) -> None:
-        with self.assertRaises(InvalidToken):
+        with self.assertRaises(InvalidTokenException):
             self.use_case.execute(RefreshTokensCommand("garbage"))

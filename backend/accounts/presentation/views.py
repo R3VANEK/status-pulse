@@ -16,11 +16,11 @@ from accounts.application.use_cases.register_user import (
     RegisterUserCommand,
 )
 from accounts.domain.exceptions import (
-    EmailAlreadyTaken,
-    InvalidCredentials,
-    InvalidEmail,
-    InvalidToken,
-    WeakPassword,
+    EmailAlreadyTakenException,
+    InvalidCredentialsException,
+    InvalidEmailException,
+    InvalidTokenException,
+    WeakPasswordException,
 )
 from accounts.infrastructure.password_policy import DjangoPasswordPolicy
 from accounts.infrastructure.repositories import DjangoUserRepository
@@ -71,9 +71,9 @@ class RegistrationView(PublicAPIView):
 
         try:
             tokens = use_case.execute(command)
-        except (InvalidEmail, EmailAlreadyTaken) as error:
+        except (InvalidEmailException, EmailAlreadyTakenException) as error:
             return Response({"email": [str(error)]}, status=status.HTTP_400_BAD_REQUEST)
-        except WeakPassword as error:
+        except WeakPasswordException as error:
             return Response(
                 {"password": error.reasons}, status=status.HTTP_400_BAD_REQUEST
             )
@@ -103,7 +103,7 @@ class LoginView(PublicAPIView):
 
         try:
             tokens = use_case.execute(command)
-        except InvalidCredentials as error:
+        except InvalidCredentialsException as error:
             return Response({"detail": str(error)}, status=status.HTTP_401_UNAUTHORIZED)
 
         return _tokens_response(tokens, status.HTTP_200_OK)
@@ -130,7 +130,7 @@ class RefreshView(PublicAPIView):
 
         try:
             tokens = use_case.execute(command)
-        except InvalidToken as error:
+        except InvalidTokenException as error:
             return Response({"detail": str(error)}, status=status.HTTP_401_UNAUTHORIZED)
 
         return _tokens_response(tokens, status.HTTP_200_OK)

@@ -18,7 +18,7 @@ class UserRepository(ABC):
 
     @abstractmethod
     def create(self, email: Email, password: str) -> User:
-        """Persist a new user. Raises EmailAlreadyTaken if the email is in use."""
+        """Persist a new user. Raises EmailAlreadyTakenException if the email is in use."""
 
     @abstractmethod
     def get_by_credentials(self, email: Email, password: str) -> User | None:
@@ -28,7 +28,7 @@ class UserRepository(ABC):
 class PasswordPolicy(ABC):
     @abstractmethod
     def validate(self, password: str, email: Email) -> None:
-        """Raise WeakPassword if the password does not meet the requirements."""
+        """Raise WeakPasswordException if the password does not meet the requirements."""
 
 
 class TokenService(ABC):
@@ -38,4 +38,4 @@ class TokenService(ABC):
 
     @abstractmethod
     def refresh(self, refresh_token: str) -> TokenPair:
-        """Exchange a refresh token for a new pair. Raises InvalidToken."""
+        """Exchange a refresh token for a new pair. Raises InvalidTokenException."""

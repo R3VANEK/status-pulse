@@ -5,7 +5,11 @@ from accounts.application.use_cases.register_user import (
     RegisterUser,
     RegisterUserCommand,
 )
-from accounts.domain.exceptions import EmailAlreadyTaken, InvalidEmail, WeakPassword
+from accounts.domain.exceptions import (
+    EmailAlreadyTakenException,
+    InvalidEmailException,
+    WeakPasswordException,
+)
 from accounts.tests.application.fakes import (
     FakeTokenService,
     InMemoryUserRepository,
@@ -34,17 +38,17 @@ class RegisterUserTests(SimpleTestCase):
         command = RegisterUserCommand(email="jan@example.com", password="s3cret-pass")
         self.use_case.execute(command)
 
-        with self.assertRaises(EmailAlreadyTaken):
+        with self.assertRaises(EmailAlreadyTakenException):
             self.use_case.execute(command)
 
     def test_rejects_invalid_email(self) -> None:
-        with self.assertRaises(InvalidEmail):
+        with self.assertRaises(InvalidEmailException):
             self.use_case.execute(
                 RegisterUserCommand(email="not-an-email", password="s3cret-pass")
             )
 
     def test_rejects_weak_password_and_does_not_create_user(self) -> None:
-        with self.assertRaises(WeakPassword):
+        with self.assertRaises(WeakPasswordException):
             self.use_case.execute(
                 RegisterUserCommand(email="jan@example.com", password="short")
             )

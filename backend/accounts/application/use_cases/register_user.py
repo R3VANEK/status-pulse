@@ -6,7 +6,7 @@ from accounts.application.interfaces import (
     TokenService,
     UserRepository,
 )
-from accounts.domain.exceptions import EmailAlreadyTaken
+from accounts.domain.exceptions import EmailAlreadyTakenException
 from accounts.domain.value_objects import Email
 
 
@@ -28,12 +28,14 @@ class RegisterUser:
         self._tokens = tokens
 
     def execute(self, command: RegisterUserCommand) -> TokenPair:
-        email = Email(command.email)  # raises InvalidEmail
+        email = Email(command.email)  # raises InvalidEmailException
 
         if self._users.exists_with_email(email):
-            raise EmailAlreadyTaken(email.value)
+            raise EmailAlreadyTakenException(email.value)
 
-        self._password_policy.validate(command.password, email)  # raises WeakPassword
+        self._password_policy.validate(
+            command.password, email
+        )  # raises WeakPasswordException
 
         user = self._users.create(email, command.password)
         return self._tokens.issue_for(user)
