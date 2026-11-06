@@ -40,4 +40,10 @@ class DjangoUserRepository(UserRepository):
 
     @staticmethod
     def _to_entity(model: UserModel) -> User:
-        return User(id=model.pk, email=Email(model.email), is_active=model.is_active)
+        return User(
+            id=model.pk,
+            email=Email(model.email),
+            first_name=model.first_name,
+            surname=model.surname,
+            is_active=model.is_active,
+        )
