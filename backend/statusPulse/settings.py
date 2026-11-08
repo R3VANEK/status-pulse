@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "corsheaders",
     "demo",
+    "projects",
 ]
 
 MIDDLEWARE = [
@@ -92,6 +93,10 @@ DATABASES = {
             "NAME": "test_statuspulse",
         },
     }
+}
+
+MIGRATION_MODULES = {
+    "projects": "projects.infrastructure.migrations",
 }
 
 

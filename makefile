@@ -24,7 +24,7 @@ start: ## Restart and start Docker Compose services
 	docker compose up
 
 make_migrations: ## Generate Django database migrations
-	cd backend && ..\venv\Scripts\python.exe manage.py makemigrations
+	cd backend && ../venv/bin/python manage.py makemigrations
 
 migrate: ## Apply Django database migrations
 	docker compose exec api python manage.py migrate
