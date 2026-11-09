@@ -191,11 +191,19 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_VERIFICATION = "none"
 
 # simplejwt: https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+# Token lifetimes in minutes, can be overridden in .env (e.g. longer for local dev).
+# Access token: short, so a leaked token expires quickly (default 15 min).
+JWT_ACCESS_TOKEN_LIFETIME_MINUTES = int(
+    os.environ.get("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", "15")
+)
+# Refresh token: after that the user has to log in again (default 7 days).
+JWT_REFRESH_TOKEN_LIFETIME_MINUTES = int(
+    os.environ.get("JWT_REFRESH_TOKEN_LIFETIME_MINUTES", str(60 * 24 * 7))
+)
+
 SIMPLE_JWT = {
-    # How long an access token is valid. Short, so a leaked token expires quickly.
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
-    # How long a refresh token is valid. After that the user has to log in again.
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=JWT_ACCESS_TOKEN_LIFETIME_MINUTES),
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=JWT_REFRESH_TOKEN_LIFETIME_MINUTES),
     # /refresh also returns a new refresh token and blacklists the old one.
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
