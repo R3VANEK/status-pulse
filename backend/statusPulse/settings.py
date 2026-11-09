@@ -86,10 +86,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "statusPulse.wsgi.application"
 
-# Custom user model (email instead of username), see accounts/infrastructure/models.py
 AUTH_USER_MODEL = "accounts.User"
 
-# Migrations of the accounts app live in the infrastructure layer (DDD)
 MIGRATION_MODULES = {
     "accounts": "accounts.infrastructure.migrations",
 }
