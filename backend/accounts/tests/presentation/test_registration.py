@@ -41,7 +41,7 @@ class RegistrationEndpointTests(APITestCase):
 
         address = EmailAddress.objects.get(email="jan@example.com")
         self.assertTrue(address.primary)
-        self.assertFalse(address.verified)
+        self.assertTrue(address.verified)
 
     def test_normalizes_email(self) -> None:
         response = self.client.post(

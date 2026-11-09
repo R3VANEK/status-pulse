@@ -22,10 +22,9 @@ class DjangoUserRepository(UserRepository):
                 model = UserModel.objects.create_user(
                     email=email.value, password=password
                 )
-                # Register the address in allauth, so its email features
-                # (verification, managing addresses) know about it.
+
                 EmailAddress.objects.create(
-                    user=model, email=email.value, primary=True, verified=False
+                    user=model, email=email.value, primary=True, verified=True
                 )
         except IntegrityError as error:
             # Another request registered the same email in the meantime.
