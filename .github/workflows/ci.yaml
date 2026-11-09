@@ -21,10 +21,10 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y docker-compose
 
       - name: Build image
-        run: docker-compose -f docker-compose.test.yaml build
+        run: docker compose -f docker-compose.test.yaml build
 
       - name: Run Ruff
-        run: docker-compose -f docker-compose.test.yaml run --no-deps --rm api ruff check .
+        run: docker compose -f docker-compose.test.yaml run --no-deps --rm api ruff check .
 
   fe-lint:
     runs-on: ubuntu-latest
@@ -85,11 +85,11 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y docker-compose
 
       - name: Build image
-        run: docker-compose -f docker-compose.test.yaml build
+        run: docker compose -f docker-compose.test.yaml build
 
       - name: Run tests
         run: |
-          docker-compose -f docker-compose.test.yaml run --rm api \
+          docker compose -f docker-compose.test.yaml run --rm api \
           sh -c "python manage.py migrate && \
           coverage run  --parallel-mode manage.py test --durations=10 && \
           coverage combine  && \
@@ -105,9 +105,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y docker-compose
 
       - name: Build image
-        run: docker-compose -f docker-compose.test.yaml build
+        run: docker compose -f docker-compose.test.yaml build
 
       - name: Check migrations
         run: |
-          docker-compose -f docker-compose.test.yaml run --rm api \
+          docker compose -f docker-compose.test.yaml run --rm api \
           sh -c "python manage.py makemigrations --check --dry-run"
