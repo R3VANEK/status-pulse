@@ -2,7 +2,7 @@ from django.test import SimpleTestCase
 
 from accounts.application.interfaces import TokenPair
 from accounts.application.use_cases.register_user import (
-    RegisterUser,
+    RegisterUserUseCase,
     RegisterUserCommand,
 )
 from accounts.domain.exceptions import (
@@ -20,7 +20,7 @@ from accounts.tests.application.fakes import (
 class RegisterUserTests(SimpleTestCase):
     def setUp(self) -> None:
         self.users = InMemoryUserRepository()
-        self.use_case = RegisterUser(
+        self.use_case = RegisterUserUseCase(
             users=self.users,
             password_policy=MinLengthPasswordPolicy(),
             tokens=FakeTokenService(),

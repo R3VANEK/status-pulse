@@ -15,7 +15,7 @@ from accounts.application.use_cases.refresh_tokens import (
     RefreshTokensCommand,
 )
 from accounts.application.use_cases.register_user import (
-    RegisterUser,
+    RegisterUserUseCase,
     RegisterUserCommand,
 )
 from accounts.domain.exceptions import (
@@ -62,7 +62,7 @@ class RegistrationView(PublicAPIView):
         serializer = CredentialsSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        use_case = RegisterUser(
+        use_case = RegisterUserUseCase(
             users=DjangoUserRepository(),
             password_policy=DjangoPasswordPolicy(),
             tokens=SimpleJwtTokenService(),

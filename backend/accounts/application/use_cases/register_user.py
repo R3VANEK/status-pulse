@@ -8,15 +8,16 @@ from accounts.application.interfaces import (
 )
 from accounts.domain.exceptions import EmailAlreadyTakenException
 from accounts.domain.value_objects import Email
+from shared.application.use_cases.base import Command, UseCase
 
 
-@dataclass(frozen=True)
-class RegisterUserCommand:
+@dataclass(frozen=True, slots=True)
+class RegisterUserCommand(Command):
     email: str
     password: str
 
 
-class RegisterUser:
+class RegisterUserUseCase(UseCase):
     def __init__(
         self,
         users: UserRepository,
@@ -33,9 +34,8 @@ class RegisterUser:
         if self._users.exists_with_email(email):
             raise EmailAlreadyTakenException(email.value)
 
-        self._password_policy.validate(
-            command.password, email
-        )  # raises WeakPasswordException
+        # raises WeakPasswordException
+        self._password_policy.validate(command.password, email)
 
         user = self._users.create(email, command.password)
         return self._tokens.issue_for(user)
