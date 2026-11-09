@@ -50,4 +50,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     REQUIRED_FIELDS: ClassVar[list[str]] = []
 
     def __str__(self) -> str:
-        return self.email
+        full_name = f"{self.first_name} {self.surname}".strip()
+        status = "active" if self.is_active else "inactive"
+        if full_name:
+            return f"{full_name} <{self.email}> ({status})"
+        return f"{self.email} ({status})"
