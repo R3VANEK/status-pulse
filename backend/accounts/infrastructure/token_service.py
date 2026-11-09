@@ -5,7 +5,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.application.interfaces import TokenPair, TokenService
 from accounts.domain.entities import User
-from accounts.domain.exceptions import InvalidTokenException
+from accounts.domain.exceptions import InvalidTokenException, UserNotFoundException
 from accounts.infrastructure.models import User as UserModel
 
 
@@ -13,7 +13,10 @@ class SimpleJwtTokenService(TokenService):
     def issue_for(self, user: User) -> TokenPair:
         if user.id is None:
             raise ValueError("Cannot issue tokens for a user that is not saved yet.")
-        model = UserModel.objects.get(pk=user.id)
+        try:
+            model = UserModel.objects.get(pk=user.id)
+        except UserModel.DoesNotExist as error:
+            raise UserNotFoundException(user.id) from error
         refresh = RefreshToken.for_user(model)
         return TokenPair(access=str(refresh.access_token), refresh=str(refresh))
 

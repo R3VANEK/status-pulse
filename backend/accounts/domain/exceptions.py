@@ -31,3 +31,9 @@ class InvalidCredentialsException(AccountsException):
 class InvalidTokenException(AccountsException):
     def __init__(self) -> None:
         super().__init__("Token is invalid or expired.")
+
+
+class UserNotFoundException(AccountsException):
+    def __init__(self, user_id: int) -> None:
+        super().__init__(f"User with id {user_id} does not exist.")
+        self.user_id = user_id
