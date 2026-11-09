@@ -43,7 +43,9 @@ class DjangoUserRepository(UserRepository):
         return User(
             id=model.pk,
             email=Email(model.email),
+            username=model.username,
             first_name=model.first_name,
             surname=model.surname,
+            phone_number=model.phone_number,
             is_active=model.is_active,
         )
