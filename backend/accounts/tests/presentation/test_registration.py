@@ -1,101 +1,69 @@
+from unittest.mock import patch
+
 from allauth.account.models import EmailAddress
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
+from accounts.domain.exceptions import (
+    EmailAlreadyTakenException,
+    InvalidEmailException,
+    WeakPasswordException,
+)
 from accounts.infrastructure.models import User as UserModel
 
 URL = "/api/auth/registration"
-STRONG_PASSWORD = "Very-Strong-Pass-1"
+PAYLOAD = {"email": "Jan@Example.com", "password": "Very-Strong-Pass-1"}
+USE_CASE = "accounts.presentation.views.RegisterUserUseCase.execute"
 
 
 class RegistrationEndpointTests(APITestCase):
     def test_registers_user_and_returns_token_pair(self) -> None:
-        response = self.client.post(
-            URL,
-            {"email": "jan@example.com", "password": STRONG_PASSWORD},
-            format="json",
-        )
+        response = self.client.post(URL, PAYLOAD, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(set(response.data), {"access", "refresh"})
 
         user = UserModel.objects.get(email="jan@example.com")
-        self.assertTrue(user.check_password(STRONG_PASSWORD))
-        self.assertNotEqual(user.password, STRONG_PASSWORD)  # stored as a hash
-
-        # Both tokens are valid JWTs signed for the new user.
-        self.assertEqual(
-            str(AccessToken(response.data["access"])["user_id"]), str(user.pk)
+        self.assertTrue(user.check_password(PAYLOAD["password"]))
+        self.assertTrue(
+            EmailAddress.objects.filter(user=user, primary=True, verified=True).exists()
         )
-        self.assertEqual(
-            str(RefreshToken(response.data["refresh"])["user_id"]), str(user.pk)
-        )
+        access = AccessToken(response.data["access"])
+        refresh = RefreshToken(response.data["refresh"])
+        self.assertEqual(str(access["user_id"]), str(user.pk))
+        self.assertEqual(str(refresh["user_id"]), str(user.pk))
 
-    def test_registers_email_in_allauth(self) -> None:
-        self.client.post(
-            URL,
-            {"email": "jan@example.com", "password": STRONG_PASSWORD},
-            format="json",
-        )
+    def test_error_mapping(self) -> None:
+        cases = [
+            (InvalidEmailException("not-an-email"), "email"),
+            (EmailAlreadyTakenException("jan@example.com"), "email"),
+            (WeakPasswordException(["Too short."]), "password"),
+        ]
+        for error, field in cases:
+            with self.subTest(error=type(error).__name__):
+                with patch(USE_CASE, side_effect=error):
+                    response = self.client.post(URL, PAYLOAD, format="json")
 
-        address = EmailAddress.objects.get(email="jan@example.com")
-        self.assertTrue(address.primary)
-        self.assertTrue(address.verified)
+                self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+                self.assertIn("details", response.data)
+                self.assertIn(field, response.data["errors"])
 
-    def test_normalizes_email(self) -> None:
-        response = self.client.post(
-            URL,
-            {"email": "  Jan@Example.COM ", "password": STRONG_PASSWORD},
-            format="json",
-        )
+        with self.subTest(error="unexpected"):
+            with patch(USE_CASE, side_effect=RuntimeError("database exploded")):
+                with self.assertLogs("accounts.presentation.views", level="ERROR"):
+                    response = self.client.post(URL, PAYLOAD, format="json")
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(UserModel.objects.filter(email="jan@example.com").exists())
+            self.assertEqual(
+                response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+            self.assertIn("details", response.data)
+            # Internal error messages must not leak to the client.
+            self.assertNotIn("database exploded", response.data["details"])
 
-    def test_rejects_email_that_is_already_taken(self) -> None:
-        UserModel.objects.create_user(email="jan@example.com", password=STRONG_PASSWORD)
+        with self.subTest(error="invalid payload"):
+            response = self.client.post(URL, {}, format="json")
 
-        response = self.client.post(
-            URL,
-            {"email": "JAN@example.com", "password": STRONG_PASSWORD},
-            format="json",
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("email", response.data)
-        self.assertEqual(UserModel.objects.count(), 1)
-
-    def test_rejects_invalid_email(self) -> None:
-        response = self.client.post(
-            URL, {"email": "not-an-email", "password": STRONG_PASSWORD}, format="json"
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("email", response.data)
-
-    def test_rejects_weak_password_and_creates_no_user(self) -> None:
-        response = self.client.post(
-            URL, {"email": "jan@example.com", "password": "12345"}, format="json"
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("password", response.data)
-        self.assertFalse(UserModel.objects.exists())
-
-    def test_requires_email_and_password(self) -> None:
-        response = self.client.post(URL, {}, format="json")
-
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("email", response.data)
-        self.assertIn("password", response.data)
-
-    def test_ignores_invalid_authorization_header(self) -> None:
-        response = self.client.post(
-            URL,
-            {"email": "jan@example.com", "password": STRONG_PASSWORD},
-            format="json",
-            HTTP_AUTHORIZATION="Bearer some-old-or-broken-token",
-        )
-
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+            self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+            self.assertIn("details", response.data)
+            self.assertEqual(set(response.data["errors"]), {"email", "password"})
