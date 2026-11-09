@@ -11,7 +11,7 @@ from accounts.application.use_cases.log_in_user import (
     LoginUserCommand,
 )
 from accounts.application.use_cases.refresh_tokens import (
-    RefreshTokens,
+    RefreshTokensUseCase,
     RefreshTokensCommand,
 )
 from accounts.application.use_cases.register_user import (
@@ -126,7 +126,7 @@ class RefreshView(PublicAPIView):
         serializer = RefreshSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        use_case = RefreshTokens(tokens=SimpleJwtTokenService())
+        use_case = RefreshTokensUseCase(tokens=SimpleJwtTokenService())
         command = RefreshTokensCommand(
             refresh_token=serializer.validated_data["refresh"]
         )
