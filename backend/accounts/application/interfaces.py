@@ -3,10 +3,11 @@ from dataclasses import dataclass
 
 from accounts.domain.entities import User
 from accounts.domain.value_objects import Email
+from shared.application.use_cases.base import ResponseDTO
 
 
-@dataclass(frozen=True)
-class TokenPair:
+@dataclass(frozen=True, slots=True)
+class TokenPair(ResponseDTO):
     access: str
     refresh: str
 

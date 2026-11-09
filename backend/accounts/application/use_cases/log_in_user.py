@@ -6,20 +6,21 @@ from accounts.domain.exceptions import (
     InvalidEmailException,
 )
 from accounts.domain.value_objects import Email
+from shared.application.use_cases.base import Command, UseCase
 
 
-@dataclass(frozen=True)
-class LogInUserCommand:
+@dataclass(frozen=True, slots=True)
+class LoginUserCommand(Command):
     email: str
     password: str
 
 
-class LogInUser:
+class LoginUserUseCase(UseCase):
     def __init__(self, users: UserRepository, tokens: TokenService) -> None:
         self._users = users
         self._tokens = tokens
 
-    def execute(self, command: LogInUserCommand) -> TokenPair:
+    def execute(self, command: LoginUserCommand) -> TokenPair:
         try:
             email = Email(command.email)
         except InvalidEmailException:

@@ -6,7 +6,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.application.interfaces import TokenPair
-from accounts.application.use_cases.log_in_user import LogInUser, LogInUserCommand
+from accounts.application.use_cases.log_in_user import (
+    LoginUserUseCase,
+    LoginUserCommand,
+)
 from accounts.application.use_cases.refresh_tokens import (
     RefreshTokens,
     RefreshTokensCommand,
@@ -93,10 +96,10 @@ class LoginView(PublicAPIView):
         serializer = CredentialsSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        use_case = LogInUser(
+        use_case = LoginUserUseCase(
             users=DjangoUserRepository(), tokens=SimpleJwtTokenService()
         )
-        command = LogInUserCommand(
+        command = LoginUserCommand(
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
         )
