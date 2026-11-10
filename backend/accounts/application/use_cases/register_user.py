@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from accounts.application.interfaces import (
     PasswordPolicy,
     TokenPair,
@@ -9,6 +7,7 @@ from accounts.application.interfaces import (
 from accounts.domain.exceptions import EmailAlreadyTakenException
 from accounts.domain.value_objects import Email
 from shared.application.use_cases.base import Command, UseCase
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True, slots=True)

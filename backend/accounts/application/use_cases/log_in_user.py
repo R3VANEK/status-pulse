@@ -1,5 +1,3 @@
-from dataclasses import dataclass
-
 from accounts.application.interfaces import TokenPair, TokenService, UserRepository
 from accounts.domain.exceptions import (
     InvalidCredentialsException,
@@ -7,6 +5,7 @@ from accounts.domain.exceptions import (
 )
 from accounts.domain.value_objects import Email
 from shared.application.use_cases.base import Command, UseCase
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True, slots=True)
@@ -28,6 +27,7 @@ class LoginUserUseCase(UseCase):
             raise InvalidCredentialsException() from None
 
         user = self._users.get_by_credentials(email, command.password)
+
         if user is None or not user.is_active:
             raise InvalidCredentialsException()
 

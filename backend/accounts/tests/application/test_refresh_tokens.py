@@ -13,7 +13,16 @@ from accounts.tests.application.fakes import FakeTokenService
 class RefreshTokensTests(SimpleTestCase):
     def setUp(self) -> None:
         self.tokens = FakeTokenService()
-        self.initial = self.tokens.issue_for(User(id=1, email=Email("jan@example.com")))
+        self.initial = self.tokens.issue_for(
+            User(
+                id=1,
+                email=Email("jan@example.com"),
+                username="foo",
+                first_name="Jan",
+                surname="Niezbędny",
+                phone_number="531420609",
+            )
+        )
         self.use_case = RefreshTokensUseCase(tokens=self.tokens)
 
     def test_returns_new_token_pair(self) -> None:

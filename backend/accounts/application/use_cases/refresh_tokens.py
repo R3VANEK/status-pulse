@@ -1,7 +1,6 @@
-from dataclasses import dataclass
-
 from accounts.application.interfaces import TokenPair, TokenService
 from shared.application.use_cases.base import Command, UseCase
+from dataclasses import dataclass
 
 
 @dataclass(frozen=True, slots=True)

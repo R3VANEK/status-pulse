@@ -9,6 +9,9 @@ from accounts.application.interfaces import (
 from accounts.domain.entities import User
 from accounts.domain.exceptions import InvalidTokenException, WeakPasswordException
 from accounts.domain.value_objects import Email
+from faker import Faker
+
+fake = Faker()
 
 
 class InMemoryUserRepository(UserRepository):
@@ -20,7 +23,14 @@ class InMemoryUserRepository(UserRepository):
         return email.value in self.users
 
     def create(self, email: Email, password: str) -> User:
-        user = User(id=len(self.users) + 1, email=email)
+        user = User(
+            id=len(self.users) + 1,
+            email=email,
+            username=fake.user_name(),
+            first_name=fake.first_name(),
+            surname=fake.last_name(),
+            phone_number=fake.phone_number(),
+        )
         self.users[email.value] = user
         self.passwords[email.value] = password
         return user
