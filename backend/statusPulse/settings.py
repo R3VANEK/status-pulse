@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "demo",
     "accounts",
+    "projects",
 ]
 
 MIDDLEWARE = [
@@ -115,6 +116,10 @@ DATABASES = {
             "NAME": "test_statuspulse",
         },
     }
+}
+
+MIGRATION_MODULES = {
+    "projects": "projects.infrastructure.migrations",
 }
 
 
