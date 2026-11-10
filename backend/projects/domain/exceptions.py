@@ -4,9 +4,9 @@ from projects.domain.enums import ProjectStatus
 
 
 class InvalidProjectDeadlineException(DomainException):
-    def __init__(self, deadline: datetime, creation_time: datetime) -> None:
+    def __init__(self, deadline: datetime, created_at: datetime) -> None:
         super().__init__(
-            f"Project's deadline of {deadline} can't be earlier than its created_at timestamp {creation_time}"
+            f"Project's deadline of {deadline} can't be earlier than its created_at timestamp {created_at}"
         )
 
 

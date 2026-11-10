@@ -9,9 +9,7 @@ from projects.domain.exceptions import (
 )
 
 _PROJECT_STATUS_TRANSTITIONS: Final[dict[ProjectStatus, frozenset[ProjectStatus]]] = {
-    ProjectStatus.PLANNED: frozenset(
-        [ProjectStatus.IN_PROGRESS, ProjectStatus.COMPLETED]
-    ),
+    ProjectStatus.PLANNED: frozenset([ProjectStatus.IN_PROGRESS]),
     ProjectStatus.IN_PROGRESS: frozenset([ProjectStatus.COMPLETED]),
     ProjectStatus.COMPLETED: frozenset([]),
 }
@@ -27,7 +25,7 @@ class Project:
     created_at: datetime
 
     def __post_init__(self) -> None:
-        if self.deadline > self.created_at:
+        if self.deadline <= self.created_at:
             raise InvalidProjectDeadlineException(
                 deadline=self.deadline, created_at=self.created_at
             )
@@ -38,7 +36,7 @@ class Project:
                 current_status=self.status,
                 desired_status=desired_status,
             )
-        self.status = desired_status
+        object.__setattr__(self, "status", desired_status)
 
     def complete(self) -> None:
         self._transition_to_status(desired_status=ProjectStatus.COMPLETED)

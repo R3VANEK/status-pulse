@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-.PHONY: help setup start make_migrations migrate shell compile_requirements
+.PHONY: help setup start make_migrations migrate shell compile_requirements test test-debug
 
 help: ## Show all available commands
 	@echo =================
@@ -15,6 +15,7 @@ _help:
 	@echo   migrate                - Apply Django database migrations
 	@echo   shell                  - Open the Django shell inside the API container
 	@echo   compile_requirements   - Compile backend requirements files
+	@echo   test                   - Run the pytest suite in the test container
 
 setup: ## Run the project setup script
 	bash ./scripts/setup
@@ -42,7 +43,7 @@ populate: ## Flush old data and populate fresh test data
 
 REFRESH_DB ?= true
 
-test: ## invoke tests e.g make test -k "test_my_awesome_example"
-	docker compose -p status-pulse-test -f docker-compose.test.yaml up -d
+test: ## invoke tests e.g make test ARGS="-k test_my_awesome_example"
+	docker compose -p status-pulse-test -f docker-compose.test.yaml up -d --build
 	docker compose -p status-pulse-test -f docker-compose.test.yaml exec api pytest --refresh-db=$(REFRESH_DB) $(ARGS)
 	docker compose -p status-pulse-test -f docker-compose.test.yaml down
