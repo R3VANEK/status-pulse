@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 """
@@ -22,7 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("SECRET_KEY", "123")
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY", "insecure-dev-only-key-change-me-in-production-0123456789"
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG")
@@ -43,7 +46,12 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "corsheaders",
+    "allauth",
+    "allauth.account",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
     "demo",
+    "accounts",
     "projects",
 ]
 
@@ -56,6 +64,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "statusPulse.urls"
@@ -77,6 +87,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "statusPulse.wsgi.application"
 
+AUTH_USER_MODEL = "accounts.User"
+
+MIGRATION_MODULES = {
+    "accounts": "accounts.infrastructure.migrations",
+    "projects": "projects.infrastructure.migrations",
+}
+
+AUTHENTICATION_BACKENDS = [
+    # Standard Django login (used by the /admin panel)
+    "django.contrib.auth.backends.ModelBackend",
+    # allauth login, e.g. by email
+    "allauth.account.auth_backends.AuthenticationBackend",
+]
+
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
@@ -94,11 +118,6 @@ DATABASES = {
         },
     }
 }
-
-MIGRATION_MODULES = {
-    "projects": "projects.infrastructure.migrations",
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -121,6 +140,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
 }
 
 # CORS
@@ -158,3 +180,34 @@ CELERY_BROKER_URL = os.environ.get("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = os.environ.get("CELERY_RESULT_BACKEND")
 
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers.DatabaseScheduler"
+
+# accounts app settings
+
+# allauth: https://docs.allauth.org/en/latest/account/configuration.html
+# Users sign up and log in with email + password, there is no username.
+ACCOUNT_LOGIN_METHODS = {"email"}
+ACCOUNT_SIGNUP_FIELDS = ["email*", "password1*"]
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+# Account can be used right away, email confirmation is not required (no mail server yet).
+ACCOUNT_EMAIL_VERIFICATION = "none"
+
+# simplejwt: https://django-rest-framework-simplejwt.readthedocs.io/en/latest/settings.html
+# Token lifetimes in minutes, can be overridden in .env (e.g. longer for local dev).
+# Access token: short, so a leaked token expires quickly (default 15 min).
+JWT_ACCESS_TOKEN_LIFETIME_MINUTES = int(
+    os.environ.get("JWT_ACCESS_TOKEN_LIFETIME_MINUTES", "15")
+)
+# Refresh token: after that the user has to log in again (default 7 days).
+JWT_REFRESH_TOKEN_LIFETIME_MINUTES = int(
+    os.environ.get("JWT_REFRESH_TOKEN_LIFETIME_MINUTES", str(60 * 24 * 7))
+)
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=JWT_ACCESS_TOKEN_LIFETIME_MINUTES),
+    "REFRESH_TOKEN_LIFETIME": timedelta(minutes=JWT_REFRESH_TOKEN_LIFETIME_MINUTES),
+    # /refresh also returns a new refresh token and blacklists the old one.
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    # Expected header format: "Authorization: Bearer <token>".
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}

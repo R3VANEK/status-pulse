@@ -1,0 +1,42 @@
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+
+from accounts.domain.entities import User
+from accounts.domain.value_objects import Email
+from shared.application.use_cases.base import ResponseDTO
+
+
+@dataclass(frozen=True, slots=True)
+class TokenPair(ResponseDTO):
+    access: str
+    refresh: str
+
+
+class UserRepository(ABC):
+    @abstractmethod
+    def exists_with_email(self, email: Email) -> bool:
+        """Check whether a user with this email is already registered."""
+
+    @abstractmethod
+    def create(self, email: Email, password: str) -> User:
+        """Persist a new user. Raises EmailAlreadyTakenException if the email is in use."""
+
+    @abstractmethod
+    def get_by_credentials(self, email: Email, password: str) -> User | None:
+        """Return the user if email and password match, otherwise None."""
+
+
+class PasswordPolicy(ABC):
+    @abstractmethod
+    def validate(self, password: str, email: Email) -> None:
+        """Raise WeakPasswordException if the password does not meet the requirements."""
+
+
+class TokenService(ABC):
+    @abstractmethod
+    def issue_for(self, user: User) -> TokenPair:
+        """Create a new access + refresh token pair for the user."""
+
+    @abstractmethod
+    def refresh(self, refresh_token: str) -> TokenPair:
+        """Exchange a refresh token for a new pair. Raises InvalidTokenException."""
