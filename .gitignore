@@ -13,3 +13,4 @@ htmlcov/
 node_modules
 .pytest_cache/
 minio/
+.vscode/
