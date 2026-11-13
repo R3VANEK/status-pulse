@@ -12,3 +12,5 @@ htmlcov/
 .mypy_cache/
 node_modules
 .pytest_cache/
+minio/
+.vscode/

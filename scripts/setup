@@ -14,7 +14,7 @@ then
     cp ./.env.copy ./.env
 fi
 
-
+mkdir -p ./minio/data
 
 if [ ! -d venv ]
 then
