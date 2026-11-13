@@ -15,6 +15,7 @@ The stack in use:
 - **uvicorn** – ASGI server for the Django application
 - **gunicorn** – WSGI server (production entry point)
 - **pytest + factory_boy** – testing stack
+- **minIO** - S3 compatible file storage
 
 The API is mounted under the `/api/` prefix (see `statusPulse/urls.py`), with schema tooling exposed at:
 
