@@ -211,3 +211,11 @@ SIMPLE_JWT = {
     # Expected header format: "Authorization: Bearer <token>".
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+
+# s3
+MINIO_ROOT_USER = os.environ.get("MINIO_ROOT_USER", "admin")
+MINIO_ROOT_PASSWORD = os.environ.get("MINIO_ROOT_PASSWORD", "password123")
+S3_ENDPOINT_URL = os.environ.get("S3_ENDPOINT_URL", "http://localhost:9000")
+S3_PROJECT_ATTACHMENT_BUCKET_NAME = "projects"
+S3_TASK_ATTACHMENT_BUCKET_NAME = "tasks"

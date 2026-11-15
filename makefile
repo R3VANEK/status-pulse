@@ -34,6 +34,7 @@ shell: ## Open the Django shell inside the API container
 	docker compose exec api python manage.py shell
 
 compile_requirements: ## Compile production and development requirements
+	python -m pip install --upgrade pip pip-tools
 	pip-compile ./build/backend/requirements.in -o ./build/backend/requirements.txt
 	pip-compile ./build/backend/requirements-dev.in -o ./build/backend/requirements-dev.txt
 
