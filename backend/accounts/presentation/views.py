@@ -1,5 +1,4 @@
 import logging
-from typing import Any
 
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
@@ -36,33 +35,17 @@ from accounts.presentation.serializers import (
     RefreshSerializer,
     TokenPairSerializer,
 )
+from shared.presentation.responses import (
+    INVALID_REQUEST_DETAILS,
+    error_response,
+    unexpected_error_response,
+)
 
 logger = logging.getLogger(__name__)
-
-INVALID_REQUEST_DETAILS = "Invalid request data."
-UNEXPECTED_ERROR_DETAILS = "Something went wrong. Please try again later."
 
 
 def _tokens_response(tokens: TokenPair, status_code: int) -> Response:
     return Response(TokenPairSerializer(tokens).data, status=status_code)
-
-
-def _error_response(
-    details: str, status_code: int, errors: dict[str, Any] | None = None
-) -> Response:
-    """Every error response has "details"; field errors go to "errors"."""
-    body: dict[str, Any] = {"details": details}
-    if errors:
-        body["errors"] = errors
-    return Response(body, status=status_code)
-
-
-def _unexpected_error_response() -> Response:
-    # Called inside an "except" block, so the full traceback lands in the logs.
-    logger.exception("Unexpected error in accounts API")
-    return _error_response(
-        UNEXPECTED_ERROR_DETAILS, status.HTTP_500_INTERNAL_SERVER_ERROR
-    )
 
 
 class PublicAPIView(APIView):
@@ -86,7 +69,7 @@ class RegistrationView(PublicAPIView):
     def post(self, request: Request) -> Response:
         serializer = CredentialsSerializer(data=request.data)
         if not serializer.is_valid():
-            return _error_response(
+            return error_response(
                 INVALID_REQUEST_DETAILS,
                 status.HTTP_400_BAD_REQUEST,
                 serializer.errors,
@@ -105,17 +88,17 @@ class RegistrationView(PublicAPIView):
         try:
             tokens = use_case.execute(command)
         except (InvalidEmailException, EmailAlreadyTakenException) as error:
-            return _error_response(
+            return error_response(
                 str(error), status.HTTP_400_BAD_REQUEST, {"email": [str(error)]}
             )
         except WeakPasswordException as error:
-            return _error_response(
+            return error_response(
                 "Password is too weak.",
                 status.HTTP_400_BAD_REQUEST,
                 {"password": error.reasons},
             )
         except Exception:
-            return _unexpected_error_response()
+            return unexpected_error_response(logger, "accounts API")
 
         return _tokens_response(tokens, status.HTTP_201_CREATED)
 
@@ -133,7 +116,7 @@ class LoginView(PublicAPIView):
     def post(self, request: Request) -> Response:
         serializer = CredentialsSerializer(data=request.data)
         if not serializer.is_valid():
-            return _error_response(
+            return error_response(
                 INVALID_REQUEST_DETAILS,
                 status.HTTP_400_BAD_REQUEST,
                 serializer.errors,
@@ -150,9 +133,9 @@ class LoginView(PublicAPIView):
         try:
             tokens = use_case.execute(command)
         except InvalidCredentialsException as error:
-            return _error_response(str(error), status.HTTP_401_UNAUTHORIZED)
+            return error_response(str(error), status.HTTP_401_UNAUTHORIZED)
         except Exception:
-            return _unexpected_error_response()
+            return unexpected_error_response(logger, "accounts API")
 
         return _tokens_response(tokens, status.HTTP_200_OK)
 
@@ -172,7 +155,7 @@ class RefreshView(PublicAPIView):
     def post(self, request: Request) -> Response:
         serializer = RefreshSerializer(data=request.data)
         if not serializer.is_valid():
-            return _error_response(
+            return error_response(
                 INVALID_REQUEST_DETAILS,
                 status.HTTP_400_BAD_REQUEST,
                 serializer.errors,
@@ -186,8 +169,8 @@ class RefreshView(PublicAPIView):
         try:
             tokens = use_case.execute(command)
         except InvalidTokenException as error:
-            return _error_response(str(error), status.HTTP_401_UNAUTHORIZED)
+            return error_response(str(error), status.HTTP_401_UNAUTHORIZED)
         except Exception:
-            return _unexpected_error_response()
+            return unexpected_error_response(logger, "accounts API")
 
         return _tokens_response(tokens, status.HTTP_200_OK)

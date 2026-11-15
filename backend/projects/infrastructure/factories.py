@@ -1,4 +1,5 @@
 from factory.django import DjangoModelFactory
+from projects.domain.enums import ProjectStatus
 from projects.infrastructure.models import Project
 import factory
 from faker import Factory
@@ -22,6 +23,8 @@ class ProjectFactory(DjangoModelFactory[Project]):
         lambda: faker.text(max_nb_chars=100) if random() <= 0.7 else None
     )
 
+    status = ProjectStatus.PLANNED.value
+
     deadline = factory.LazyFunction(
-        lambda: timezone.now() + timedelta(days=random() * 30)
+        lambda: timezone.now() + timedelta(days=1 + random() * 30)
     )

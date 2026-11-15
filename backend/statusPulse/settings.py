@@ -213,6 +213,11 @@ SIMPLE_JWT = {
 }
 
 
+# projects app settings
+PROJECTS_DEFAULT_PAGE_SIZE = 20
+PROJECTS_MAX_PAGE_SIZE = 100
+
+
 # s3
 MINIO_ROOT_USER = os.environ.get("MINIO_ROOT_USER", "admin")
 MINIO_ROOT_PASSWORD = os.environ.get("MINIO_ROOT_PASSWORD", "password123")
