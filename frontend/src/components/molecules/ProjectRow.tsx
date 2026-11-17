@@ -3,7 +3,7 @@ import { ProjectIcon } from "../atoms/ProjectIcon";
 import { StatusBadge } from "../atoms/StatusBadge";
 import { ActionsMenu } from "./ActionsMenu";
 
-const CELL_CLASS = "border-y border-line px-4 py-4";
+const CELL_CLASS = "border-y border-line bg-surface-raised px-4 py-4";
 
 type ProjectRowProps = {
   project: Project;

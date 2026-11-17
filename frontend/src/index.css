@@ -6,6 +6,7 @@
   --color-surface-raised: #ffffff;
   --color-surface-muted: #f4f3f9;
   --color-line: #e9ebf2;
+  --color-field-line: #f4f3f9;
 
   --color-fg: #222333;
   --color-fg-muted: #9292a8;
@@ -26,14 +27,15 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-page: #191b27;
-    --color-surface: #222632;
-    --color-surface-raised: #262938;
-    --color-surface-muted: #262938;
-    --color-line: #383b4c;
+    --color-page: #181b28;
+    --color-surface: #212633;
+    --color-surface-raised: #252939;
+    --color-surface-muted: #252939;
+    --color-line: #414659;
+    --color-field-line: #414659;
 
-    --color-fg: #e8ebf6;
-    --color-fg-muted: #acb0c2;
+    --color-fg: #e8ebf7;
+    --color-fg-muted: #abb0c4;
 
     --color-primary-soft: #333b5d;
     --color-on-primary-soft: #acb7fa;

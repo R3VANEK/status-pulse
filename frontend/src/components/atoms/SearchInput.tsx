@@ -18,7 +18,7 @@ export function SearchInput({ className = "", ...props }: SearchInputProps) {
       </svg>
       <input
         type="search"
-        className="bg-surface-muted text-fg placeholder:text-fg-muted focus:outline-primary rounded-control h-10.5 w-full pr-3 pl-9 text-[13px] focus:outline-2"
+        className="border-field-line bg-surface-muted text-fg placeholder:text-fg-muted focus:outline-primary rounded-control h-10.5 w-full border pr-3 pl-9 text-[13px] focus:outline-2"
         {...props}
       />
     </div>
