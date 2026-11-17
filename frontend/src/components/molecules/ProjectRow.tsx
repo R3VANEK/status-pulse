@@ -3,43 +3,38 @@ import { ProjectIcon } from "../atoms/ProjectIcon";
 import { StatusBadge } from "../atoms/StatusBadge";
 import { ActionsMenu } from "./ActionsMenu";
 
+const CELL_CLASS = "border-y border-line px-4 py-4";
+
 type ProjectRowProps = {
   project: Project;
 };
 
 export function ProjectRow({ project }: ProjectRowProps) {
   return (
-    <tr className="border-line border-t">
-      <td className="px-6 py-4">
-        <div className="flex items-center gap-3">
+    <tr>
+      <td className={`${CELL_CLASS} rounded-l-control border-l pl-2`}>
+        <div className="flex items-center gap-4">
           <ProjectIcon />
           <div>
-            <p className="text-fg font-medium">{project.name}</p>
-            <p className="text-fg-muted text-sm">
+            <p className="text-fg text-sm font-semibold">{project.name}</p>
+            <p className="text-fg-muted mt-1 text-xs">
               {project.category} • {project.code}
             </p>
           </div>
         </div>
       </td>
-      <td className="px-6 py-4">
+      <td className={CELL_CLASS}>
         <StatusBadge status={project.status} />
       </td>
-      <td className="px-6 py-4">
-        <div className="flex -space-x-2">
-          {project.team.map((initials) => (
-            <span
-              key={initials}
-              className="border-surface bg-primary-soft text-on-primary-soft flex size-8 items-center justify-center rounded-full border-2 text-xs font-medium"
-            >
-              {initials}
-            </span>
-          ))}
-        </div>
+      <td className={`${CELL_CLASS} text-fg text-[13px] font-semibold`}>
+        {project.team.join(" ")}
       </td>
-      <td className="text-fg px-6 py-4 text-sm">
+      <td className={`${CELL_CLASS} text-fg text-[13px]`}>
         {project.tasksDone} / {project.tasksTotal}
       </td>
-      <td className="px-6 py-4 text-right">
+      <td
+        className={`${CELL_CLASS} rounded-r-control border-r pr-2 text-right`}
+      >
         <ActionsMenu />
       </td>
     </tr>

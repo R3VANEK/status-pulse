@@ -13,7 +13,7 @@ type StatusBadgeProps = {
 export function StatusBadge({ status }: StatusBadgeProps) {
   return (
     <span
-      className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${STATUS_CLASSES[status]}`}
+      className={`inline-flex h-7 items-center rounded-full px-3 text-xs font-semibold ${STATUS_CLASSES[status]}`}
     >
       {PROJECT_STATUS_LABELS[status]}
     </span>

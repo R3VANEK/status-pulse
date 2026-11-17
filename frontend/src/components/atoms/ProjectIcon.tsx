@@ -1,6 +1,6 @@
 export function ProjectIcon() {
   return (
-    <div className="bg-primary-soft text-on-primary-soft flex size-10 shrink-0 items-center justify-center rounded-lg">
+    <div className="bg-primary-soft text-on-primary-soft rounded-control flex size-10 shrink-0 items-center justify-center">
       <svg
         aria-hidden="true"
         viewBox="0 0 20 20"

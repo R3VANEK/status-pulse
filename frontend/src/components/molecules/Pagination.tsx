@@ -3,7 +3,8 @@ type PaginationProps = {
   totalPages: number;
 };
 
-const BASE_CLASS = "flex size-8 items-center justify-center rounded-lg text-sm";
+const BASE_CLASS =
+  "flex size-8 items-center justify-center rounded-control text-[13px]";
 
 export function Pagination({ currentPage, totalPages }: PaginationProps) {
   const pages = Array.from({ length: totalPages }, (_, index) => index + 1);
@@ -25,8 +26,8 @@ export function Pagination({ currentPage, totalPages }: PaginationProps) {
           aria-current={page === currentPage ? "page" : undefined}
           className={`${BASE_CLASS} ${
             page === currentPage
-              ? "bg-primary text-on-primary"
-              : "text-fg hover:bg-surface-muted"
+              ? "text-fg font-semibold"
+              : "text-fg-muted hover:text-fg"
           }`}
         >
           {page}

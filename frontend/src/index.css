@@ -5,18 +5,21 @@
   --color-surface: #ffffff;
   --color-surface-raised: #ffffff;
   --color-surface-muted: #f4f3f9;
-  --color-line: #e9ebf1;
+  --color-line: #e9ebf2;
 
-  --color-fg: #222332;
-  --color-fg-muted: #9292a6;
+  --color-fg: #222333;
+  --color-fg-muted: #9292a8;
 
-  --color-primary: #586cf5;
+  --color-primary: #536dfe;
   --color-on-primary: #ffffff;
-  --color-primary-soft: #eff2fe;
-  --color-on-primary-soft: #586cf5;
+  --color-primary-soft: #eef2ff;
+  --color-on-primary-soft: #536dfe;
 
-  --color-success-soft: #eaf7ee;
-  --color-on-success-soft: #4f986a;
+  --color-success-soft: #e7f7ee;
+  --color-on-success-soft: #2c9a66;
+
+  --radius-control: 10px;
+  --radius-card: 20px;
 
   --font-sans: "Inter", system-ui, "Segoe UI", Roboto, sans-serif;
 }
