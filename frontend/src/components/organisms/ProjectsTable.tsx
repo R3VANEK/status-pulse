@@ -30,7 +30,7 @@ export function ProjectsTable({ projects, total }: ProjectsTableProps) {
           />
           <select
             aria-label="Filtruj po statusie"
-            className="border-line bg-surface text-fg rounded-lg border px-3 py-2 text-sm"
+            className="border-line bg-surface text-fg h-10 rounded-lg border px-3 text-sm"
           >
             <option value="">Status: Wszystkie</option>
             {Object.entries(PROJECT_STATUS_LABELS).map(([value, label]) => (
