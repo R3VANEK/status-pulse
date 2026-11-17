@@ -29,7 +29,7 @@ export function ProjectRow({ project }: ProjectRowProps) {
           {project.team.map((initials) => (
             <span
               key={initials}
-              className="border-surface bg-surface-muted text-fg-muted flex size-8 items-center justify-center rounded-full border-2 text-xs font-medium"
+              className="border-surface bg-primary-soft text-on-primary-soft flex size-8 items-center justify-center rounded-full border-2 text-xs font-medium"
             >
               {initials}
             </span>

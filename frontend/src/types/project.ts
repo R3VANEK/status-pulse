@@ -10,3 +10,9 @@ export type Project = {
   tasksDone: number;
   tasksTotal: number;
 };
+
+export const PROJECT_STATUS_LABELS: Record<ProjectStatus, string> = {
+  planned: "Planowany",
+  in_progress: "W trakcie",
+  completed: "Zakończony",
+};
