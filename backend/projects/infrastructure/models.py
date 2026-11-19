@@ -2,9 +2,11 @@ from uuid import uuid4
 from django.db import models
 from django.utils import timezone
 from projects.domain.enums import ProjectStatus
+from shared.infrastructure.models import S3FileField
 
 
 class Project(models.Model):
+
     ProjectStatusChoices = models.TextChoices(
         "ProjectStatusChoices",
         [(status.name, status.value) for status in ProjectStatus],
@@ -24,3 +26,18 @@ class Project(models.Model):
                 condition=models.Q(deadline__gte=models.F("created_at")),
             ),
         ]
+
+
+class ProjectAttachment(models.Model):
+
+    @property
+    def instance_hash(self) -> str:
+        return str(self.project_id)  # type: ignore
+
+    @property
+    def bucket_name(self) -> str:
+        return "projects"
+
+    file = S3FileField()
+    upload_date = models.DateTimeField(auto_now=True)
+    project = models.ForeignKey(to=Project, on_delete=models.CASCADE)

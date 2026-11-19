@@ -9,9 +9,14 @@ from demo.factories import ProgramFactory  # noqa: E402
 from projects.infrastructure.factories import ProjectFactory  # noqa: E402
 from integrations.s3 import get_s3_client  # noqa: E402
 from django.conf import settings  # noqa: E402
+from django.core.files.base import ContentFile
+from accounts.infrastructure.models import User
 
 
 def populate_s3() -> None:
+
+    s3 = get_s3_client()
+
     print("----------------------------------------------------------")
     s3 = get_s3_client()
 
@@ -38,8 +43,22 @@ def populate_s3() -> None:
 
 def populate_db() -> None:
     print("----------------------------------------------------------")
+
+    admin = User(
+        email=settings.ADMIN_EMAIL,
+        username="admin",
+        first_name="admin",
+        surname="admin",
+        is_staff=True,
+        is_superuser=True,
+    )
+
+    admin.set_password(settings.ADMIN_PASSWORD)
+    admin.save()
+
     ProgramFactory.create_batch(50)
     ProjectFactory.create_batch(50)
+    print(f"Created admin {admin.email}")
     print("Created 50 programs.")
     print("Created 50 projects.")
 
