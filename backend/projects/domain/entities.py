@@ -7,6 +7,9 @@ from projects.domain.exceptions import (
     InvalidProjectDeadlineException,
     IllegalProjectStateTransitionException,
 )
+from shared.domain.entities import File
+
+from projects.domain import exceptions
 
 _PROJECT_STATUS_TRANSTITIONS: Final[dict[ProjectStatus, frozenset[ProjectStatus]]] = {
     ProjectStatus.PLANNED: frozenset([ProjectStatus.IN_PROGRESS]),
@@ -16,10 +19,18 @@ _PROJECT_STATUS_TRANSTITIONS: Final[dict[ProjectStatus, frozenset[ProjectStatus]
 
 
 @dataclass(frozen=True, slots=True)
+class ProjectAttachment:
+    id: UUID | None
+    file: File
+    upload_date: datetime
+
+
+@dataclass(frozen=True, slots=True)
 class Project:
     id: UUID | None
     name: str
     description: str | None
+    attachments: list[ProjectAttachment]
     status: ProjectStatus
     deadline: datetime
     created_at: datetime
@@ -43,3 +54,20 @@ class Project:
 
     def start(self) -> None:
         self._transition_to_status(desired_status=ProjectStatus.IN_PROGRESS)
+
+    def delete_attachment(self, id: UUID) -> ProjectAttachment:
+        "Removes and returns deleted attachment."
+
+        if self.status == ProjectStatus.COMPLETED:
+            raise exceptions.ClosedProjectException(action="deleting attachment")
+
+        deleted_attachment = next(
+            (obj for obj in self.attachments if obj.id == id), None
+        )
+
+        if not deleted_attachment:
+            raise exceptions.ProjectAttachmentNotFoundException
+
+        self.attachments.remove(deleted_attachment)
+
+        return deleted_attachment

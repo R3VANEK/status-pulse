@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
+from typing import Any
 
 
 @dataclass(frozen=True, slots=True)
@@ -14,4 +15,4 @@ class ResponseDTO:
 
 class UseCase(ABC):
     @abstractmethod
-    def execute(self, command: Command) -> ResponseDTO: ...
+    def execute(self, command: Any) -> Any: ...

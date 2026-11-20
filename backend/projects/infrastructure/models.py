@@ -2,7 +2,7 @@ from uuid import uuid4
 from django.db import models
 from django.utils import timezone
 from projects.domain.enums import ProjectStatus
-from shared.infrastructure.models import S3FileField
+from shared.infrastructure.models import Attachment
 
 
 class Project(models.Model):
@@ -28,7 +28,7 @@ class Project(models.Model):
         ]
 
 
-class ProjectAttachment(models.Model):
+class ProjectAttachment(Attachment):
 
     @property
     def instance_hash(self) -> str:
@@ -38,6 +38,14 @@ class ProjectAttachment(models.Model):
     def bucket_name(self) -> str:
         return "projects"
 
-    file = S3FileField()
-    upload_date = models.DateTimeField(auto_now=True)
-    project = models.ForeignKey(to=Project, on_delete=models.CASCADE)
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid4,
+        editable=False,
+    )
+
+    project = models.ForeignKey(
+        to=Project,
+        related_name="attachments",
+        on_delete=models.CASCADE,
+    )

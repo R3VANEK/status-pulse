@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.core.files.storage import Storage
 from integrations.s3 import get_s3_client
@@ -15,17 +17,18 @@ def instance_hash_path(instance: models.Model, filename: str):
     if bucket_name is None:
         raise Exception(f"no bucket_name param of {instance.__class__.__name__}")
 
-    if instance_hash:
-        return f"{bucket_name}/{instance_hash}/{filename}"
+    random_name = uuid.uuid4().hex
+    if instance_hash != "":
+        return f"{bucket_name}/{instance_hash}/{random_name}"
     else:
-        return f"{bucket_name}/{filename}"
+        return f"{bucket_name}/{random_name}"
 
 
 @deconstructible
 class S3Storage(Storage):
 
     def _split_filename(self, name: str) -> tuple[str, str]:
-        """since name is path like eg. projects/foo.txt we split bucket info, from filename"""
+        """since name is path like eg. projects/123-123-123/foo.txt we split bucket info (projects), from filename"""
         name = name.strip()
         bucket = name.split("/")[0]
         filename = name[name.index("/") + 1 :]
@@ -64,3 +67,32 @@ class S3FileField(models.FileField):
             name=name,
             **kwargs,
         )
+
+
+class Attachment(models.Model):
+
+    class Meta:
+        abstract = True
+
+    @property
+    @abstractmethod
+    def instance_hash(self) -> str:
+        """provide it if the file should be stored under some unique folder e.g. foreign key instance hash"""
+        ...
+
+    @property
+    @abstractmethod
+    def bucket_name(self) -> str:
+        """s3 bucket name where to store the file"""
+        ...
+
+    # originally uploaded file name before computing random hash to s3
+    file_name = models.CharField(max_length=100)
+
+    content_type = models.CharField(max_length=100)
+
+    content_size = models.PositiveIntegerField()
+
+    file = S3FileField()
+
+    upload_date = models.DateTimeField(auto_now=True)
