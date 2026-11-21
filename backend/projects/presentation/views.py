@@ -4,11 +4,9 @@ from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
 from projects.infrastructure.models import Project, ProjectAttachment
 
 from projects.application.use_cases import delete_attachment
-from projects.domain import exceptions as domain_exceptions
 
 from projects.infrastructure.repositories import (
     DjangoProjectRepository,
@@ -20,7 +18,6 @@ LOGGER = logging.getLogger("projects")
 
 
 class ProjectAttachmentGeneralView(APIView):
-
     def post(
         self,
         request: Request,
@@ -61,7 +58,6 @@ class ProjectAttachmentGeneralView(APIView):
 
 
 class ProjectAttachmentDetailView(APIView):
-
     def get(
         self,
         request: Request,
@@ -94,14 +90,6 @@ class ProjectAttachmentDetailView(APIView):
             attachments=DjangoProjectAttachmentRepository,
         )
 
-        try:
-            use_case.execute(command)
-        except domain_exceptions.ProjectAttachmentNotFoundException as e:
-            pass
-        except Exception as e:
-            LOGGER.error(
-                f"unhandled error occured in DELETE {self.__class__.__name__} error: {e}"
-            )
-            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        use_case.execute(command)
 
-        return Response(status=status.HTTP_200_OK)
+        return Response(status=status.HTTP_204_NO_CONTENT)

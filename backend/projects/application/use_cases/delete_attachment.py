@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from uuid import UUID
 
-from projects.domain.exceptions import ProjectNotFound
+from projects.domain.exceptions import ProjectNotFoundException
 
 from shared.application.use_cases.base import (
     Command as BaseCommand,
@@ -43,7 +43,7 @@ class UseCase(BaseUseCase):
         )
 
         if project is None:
-            raise ProjectNotFound()
+            raise ProjectNotFoundException()
 
         attachment_to_delete = project.delete_attachment(id=command.attachment_id)
 

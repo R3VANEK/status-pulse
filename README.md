@@ -24,6 +24,8 @@ Simple web application fro managing teams and tasks. Made as a team project for 
 - kubernetes deploy config
 - rate limiting
 - nginx setup
+- drf-spectacular better docs about endpoints
+- api versioning
 
 ## Authors
 

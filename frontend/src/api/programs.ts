@@ -6,7 +6,7 @@ export type Program = {
 };
 
 const API_BASE_URL: string =
-  import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
+  import.meta.env.VITE_API_URL ?? "http://localhost:8009/api";
 
 export class ApiError extends Error {
   readonly status: number;
