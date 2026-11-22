@@ -8,4 +8,5 @@ EXCEPTION_MAPPER: Final[dict[BaseException, int]] = {
     domain_exceptions.IllegalProjectStateTransitionException: status.HTTP_409_CONFLICT,
     domain_exceptions.InvalidProjectDeadlineException: status.HTTP_400_BAD_REQUEST,
     domain_exceptions.ProjectAttachmentNotFoundException: status.HTTP_404_NOT_FOUND,
+    domain_exceptions.InvalidProjectAttachmentException: status.HTTP_400_BAD_REQUEST,
 }

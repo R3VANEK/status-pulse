@@ -8,7 +8,7 @@ urlpatterns = [
         name="project-attachments-general",
     ),
     path(
-        "<uuid:project_uuid>/attachments/<uuid:attachment_uuid>",
+        "<uuid:project_id>/attachments/<uuid:attachment_id>",
         view=views.ProjectAttachmentDetailView.as_view(),
         name="project-attachments-detail",
     ),

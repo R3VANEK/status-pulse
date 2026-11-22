@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+
 from accounts.application.interfaces import (
     PasswordPolicy,
     TokenPair,
@@ -6,17 +8,19 @@ from accounts.application.interfaces import (
 )
 from accounts.domain.exceptions import EmailAlreadyTakenException
 from accounts.domain.value_objects import Email
-from shared.application.use_cases.base import Command, UseCase
-from dataclasses import dataclass
+from shared.application.use_cases.base import (
+    Command as BaseCommand,
+    UseCase as BaseUseCase,
+)
 
 
 @dataclass(frozen=True, slots=True)
-class RegisterUserCommand(Command):
+class Command(BaseCommand):
     email: str
     password: str
 
 
-class RegisterUserUseCase(UseCase):
+class UseCase(BaseUseCase):
     def __init__(
         self,
         users: UserRepository,
@@ -27,7 +31,7 @@ class RegisterUserUseCase(UseCase):
         self._password_policy = password_policy
         self._tokens = tokens
 
-    def execute(self, command: RegisterUserCommand) -> TokenPair:
+    def execute(self, command: Command) -> TokenPair:
         email = Email(command.email)  # raises InvalidEmailException
 
         if self._users.exists_with_email(email):

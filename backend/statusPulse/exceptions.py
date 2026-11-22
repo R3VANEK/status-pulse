@@ -18,25 +18,26 @@ LOGGER = logging.getLogger("exceptions")
 
 
 def custom_exception_handler(exc: BaseException, context: Any) -> Response | None:
-
     response = exception_handler(exc, context)
 
-    if response is not None:
-        status_code = ALL_EXCEPTION_MAPPER.get(
-            exc, default=status.HTTP_500_INTERNAL_SERVER_ERROR
-        )
+    mapped_status = ALL_EXCEPTION_MAPPER.get(
+        type(exc), status.HTTP_500_INTERNAL_SERVER_ERROR
+    )
 
-        if status_code == status.HTTP_500_INTERNAL_SERVER_ERROR:
+    if response is None:
+        if mapped_status == status.HTTP_500_INTERNAL_SERVER_ERROR:
             error_id = uuid4()
-            LOGGER.error(f"[{error_id}] Unhandled error occured: {exc}", exc_info=True)
-            output = {
-                "details": "Something went wrong. Please try again later",
-                "error_id": error_id,
-            }
+            LOGGER.error(
+                "[%s] Unhandled error occured: %s", error_id, exc, exc_info=True
+            )
+            return Response(
+                {
+                    "details": "Something went wrong. Please try again later",
+                    "error_id": str(error_id),
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
         else:
-            output = {"details": str(exc)}
-
-        response.status_code = status_code
-        response.data = output
+            return Response(status=mapped_status, data={"details": str(exc)})
 
     return response

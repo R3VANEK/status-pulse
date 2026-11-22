@@ -14,7 +14,7 @@ from accounts.infrastructure.models import User as UserModel
 
 URL = "/api/auth/registration"
 PAYLOAD = {"email": "Jan@Example.com", "password": "Very-Strong-Pass-1"}
-USE_CASE = "accounts.presentation.views.RegisterUserUseCase.execute"
+USE_CASE = "accounts.presentation.views.register_user.UseCase.execute"
 
 
 class RegistrationEndpointTests(APITestCase):

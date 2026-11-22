@@ -2,18 +2,17 @@ from projects.infrastructure import models
 from projects.domain import entities
 from projects.application.interfaces import ProjectAttachmentRepository
 from uuid import UUID
+
+from django.core.files.base import ContentFile
 from shared.domain.entities import File
 from projects.domain.enums import ProjectStatus
 from shared.infrastructure.repositories import (
     TooManyRecordsReturnedException,
-    RepositoryException,
 )
 from projects.application.interfaces import ProjectRepository
-from shared.infrastructure.repositories import RepositoryExceptionWrapper
 
 
 class DjangoProjectRepository(ProjectRepository):
-
     @staticmethod
     def get(actor_id: UUID, project_id: UUID) -> entities.Project | None:  # type: ignore
         """get project within actor scope"""
@@ -34,7 +33,9 @@ class DjangoProjectRepository(ProjectRepository):
     def _to_entity(model: models.Project) -> entities.Project:
         """Parse orm-like object to domain entity"""
 
-        model_attachments: list[models.ProjectAttachment] = list(model.attachments.all())  # type: ignore
+        model_attachments: list[models.ProjectAttachment] = list(
+            model.attachments.all()
+        )  # type: ignore
         entity_attachments: list[entities.ProjectAttachment] = []
 
         for attachment in model_attachments:
@@ -54,7 +55,6 @@ class DjangoProjectRepository(ProjectRepository):
 
 
 class DjangoProjectAttachmentRepository(ProjectAttachmentRepository):
-
     @staticmethod
     def delete(actor_id: UUID, project_id: UUID, attachment_id: UUID) -> int:  # type: ignore
         """delete attachment by its id and project id and return number of deleted rows"""
@@ -63,6 +63,23 @@ class DjangoProjectAttachmentRepository(ProjectAttachmentRepository):
         return models.ProjectAttachment.objects.filter(
             id=attachment_id, project_id=project_id
         ).delete()[0]
+
+    @staticmethod
+    def create(
+        actor_id: UUID, project_id: UUID, file: File
+    ) -> entities.ProjectAttachment:  # type: ignore
+        """create attachment for a project"""
+
+        # TODO: complete here the query for check user in project
+        attachment = models.ProjectAttachment.objects.create(
+            project_id=project_id,
+            file_name=file.name,
+            content_type=file.content_type,
+            content_size=file.content_size,
+            file=ContentFile(file.content, name=file.name),
+        )
+
+        return DjangoProjectAttachmentRepository._to_entity(attachment)
 
     @staticmethod
     def _to_entity(model: models.ProjectAttachment) -> entities.ProjectAttachment:

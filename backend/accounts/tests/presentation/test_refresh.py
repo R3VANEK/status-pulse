@@ -11,7 +11,7 @@ from accounts.infrastructure.models import User as UserModel
 
 REGISTRATION_URL = "/api/auth/registration"
 URL = "/api/auth/refresh"
-USE_CASE = "accounts.presentation.views.RefreshTokensUseCase.execute"
+USE_CASE = "accounts.presentation.views.refresh_tokens.UseCase.execute"
 
 
 class RefreshEndpointTests(APITestCase):

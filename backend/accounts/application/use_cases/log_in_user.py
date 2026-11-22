@@ -1,25 +1,29 @@
+from dataclasses import dataclass
+
 from accounts.application.interfaces import TokenPair, TokenService, UserRepository
 from accounts.domain.exceptions import (
     InvalidCredentialsException,
     InvalidEmailException,
 )
 from accounts.domain.value_objects import Email
-from shared.application.use_cases.base import Command, UseCase
-from dataclasses import dataclass
+from shared.application.use_cases.base import (
+    Command as BaseCommand,
+    UseCase as BaseUseCase,
+)
 
 
 @dataclass(frozen=True, slots=True)
-class LoginUserCommand(Command):
+class Command(BaseCommand):
     email: str
     password: str
 
 
-class LoginUserUseCase(UseCase):
+class UseCase(BaseUseCase):
     def __init__(self, users: UserRepository, tokens: TokenService) -> None:
         self._users = users
         self._tokens = tokens
 
-    def execute(self, command: LoginUserCommand) -> TokenPair:
+    def execute(self, command: Command) -> TokenPair:
         try:
             email = Email(command.email)
         except InvalidEmailException:

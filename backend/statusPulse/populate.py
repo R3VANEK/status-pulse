@@ -14,8 +14,6 @@ from accounts.infrastructure.models import User  # noqa: E402
 
 def populate_s3() -> None:
 
-    s3 = get_s3_client()
-
     print("----------------------------------------------------------")
     s3 = get_s3_client()
 
@@ -63,5 +61,5 @@ def populate_db() -> None:
 
 
 if __name__ == "__main__":
-    populate_s3()
+    # populate_s3()
     populate_db()

@@ -8,17 +8,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.application.interfaces import TokenPair
-from accounts.application.use_cases.log_in_user import (
-    LoginUserUseCase,
-    LoginUserCommand,
-)
-from accounts.application.use_cases.refresh_tokens import (
-    RefreshTokensUseCase,
-    RefreshTokensCommand,
-)
-from accounts.application.use_cases.register_user import (
-    RegisterUserUseCase,
-    RegisterUserCommand,
+from accounts.application.use_cases import (
+    log_in_user,
+    refresh_tokens,
+    register_user,
 )
 from accounts.infrastructure.password_policy import DjangoPasswordPolicy
 from accounts.infrastructure.repositories import DjangoUserRepository
@@ -74,12 +67,12 @@ class RegistrationView(PublicAPIView):
                 data={"details": serializer.error_messages},
             )
 
-        use_case = RegisterUserUseCase(
+        use_case = register_user.UseCase(
             users=DjangoUserRepository(),
             password_policy=DjangoPasswordPolicy(),
             tokens=SimpleJwtTokenService(),
         )
-        command = RegisterUserCommand(
+        command = register_user.Command(
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
         )
@@ -102,10 +95,10 @@ class LoginView(PublicAPIView):
                 data={"details": serializer.error_messages},
             )
 
-        use_case = LoginUserUseCase(
+        use_case = log_in_user.UseCase(
             users=DjangoUserRepository(), tokens=SimpleJwtTokenService()
         )
-        command = LoginUserCommand(
+        command = log_in_user.Command(
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
         )
@@ -126,8 +119,8 @@ class RefreshView(PublicAPIView):
                 data={"details": serializer.error_messages},
             )
 
-        use_case = RefreshTokensUseCase(tokens=SimpleJwtTokenService())
-        command = RefreshTokensCommand(
+        use_case = refresh_tokens.UseCase(tokens=SimpleJwtTokenService())
+        command = refresh_tokens.Command(
             refresh_token=serializer.validated_data["refresh"]
         )
 

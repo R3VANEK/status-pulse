@@ -1,16 +1,20 @@
-from accounts.application.interfaces import TokenPair, TokenService
-from shared.application.use_cases.base import Command, UseCase
 from dataclasses import dataclass
+
+from accounts.application.interfaces import TokenPair, TokenService
+from shared.application.use_cases.base import (
+    Command as BaseCommand,
+    UseCase as BaseUseCase,
+)
 
 
 @dataclass(frozen=True, slots=True)
-class RefreshTokensCommand(Command):
+class Command(BaseCommand):
     refresh_token: str
 
 
-class RefreshTokensUseCase(UseCase):
+class UseCase(BaseUseCase):
     def __init__(self, tokens: TokenService) -> None:
         self._tokens = tokens
 
-    def execute(self, command: RefreshTokensCommand) -> TokenPair:
+    def execute(self, command: Command) -> TokenPair:
         return self._tokens.refresh(command.refresh_token)

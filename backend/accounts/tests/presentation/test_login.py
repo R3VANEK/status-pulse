@@ -9,7 +9,7 @@ from accounts.infrastructure.models import User as UserModel
 
 URL = "/api/auth/login"
 PAYLOAD = {"email": "jan@example.com", "password": "Very-Strong-Pass-1"}
-USE_CASE = "accounts.presentation.views.LoginUserUseCase.execute"
+USE_CASE = "accounts.presentation.views.log_in_user.UseCase.execute"
 
 
 class LoginEndpointTests(APITestCase):

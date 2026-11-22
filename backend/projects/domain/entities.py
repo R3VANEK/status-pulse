@@ -55,6 +55,15 @@ class Project:
     def start(self) -> None:
         self._transition_to_status(desired_status=ProjectStatus.IN_PROGRESS)
 
+    def add_attachment(self, attachment: ProjectAttachment) -> ProjectAttachment:
+        """Adds and returns the new attachment."""
+
+        if self.status == ProjectStatus.COMPLETED:
+            raise exceptions.ClosedProjectException(action="adding attachment")
+
+        self.attachments.append(attachment)
+        return attachment
+
     def delete_attachment(self, id: UUID) -> ProjectAttachment:
         "Removes and returns deleted attachment."
 
