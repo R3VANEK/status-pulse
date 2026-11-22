@@ -10,16 +10,16 @@ export function ProjectsPage() {
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-fg text-2xl font-semibold md:text-3xl">
-            Projekty
+            Projects
           </h1>
           <p className="text-fg-muted mt-1 text-sm">
-            <span className="md:hidden">Zarządzaj pracą zespołu</span>
+            <span className="md:hidden">Manage your team's work</span>
             <span className="hidden md:inline">
-              Zarządzaj projektami i pracą swojego zespołu
+              Manage projects and your team's work
             </span>
           </p>
         </div>
-        <Button className="w-full md:w-auto">+ Nowy projekt</Button>
+        <Button className="w-full md:w-auto">+ New project</Button>
       </header>
 
       <div className="hidden md:block">
@@ -28,8 +28,8 @@ export function ProjectsPage() {
 
       <div className="flex flex-col gap-4 md:hidden">
         <SearchInput
-          placeholder="Szukaj projektu…"
-          aria-label="Szukaj projektu"
+          placeholder="Search projects…"
+          aria-label="Search projects"
         />
         <ul className="flex flex-col gap-3">
           {MOCK_PROJECTS.map((project) => (

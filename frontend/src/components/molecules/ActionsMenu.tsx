@@ -7,7 +7,7 @@ export function ActionsMenu() {
     <div className="relative inline-block">
       <button
         type="button"
-        aria-label="Akcje projektu"
+        aria-label="Project actions"
         aria-haspopup="menu"
         aria-expanded={isOpen}
         onClick={() => setIsOpen((open) => !open)}
@@ -41,7 +41,7 @@ export function ActionsMenu() {
               onClick={() => setIsOpen(false)}
               className="text-fg hover:bg-surface-muted block w-full px-3 py-2 text-left text-sm"
             >
-              Edytuj
+              Edit
             </button>
             <button
               type="button"
@@ -49,7 +49,7 @@ export function ActionsMenu() {
               onClick={() => setIsOpen(false)}
               className="text-fg hover:bg-surface-muted block w-full px-3 py-2 text-left text-sm"
             >
-              Usuń
+              Delete
             </button>
           </div>
         </>

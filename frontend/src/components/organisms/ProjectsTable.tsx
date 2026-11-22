@@ -5,7 +5,7 @@ import { ProjectRow } from "../molecules/ProjectRow";
 
 const PAGE_SIZE = 4;
 
-const COLUMNS = ["Projekt", "Status", "Zespół", "Zadania"];
+const COLUMNS = ["Project", "Status", "Team", "Tasks"];
 
 type ProjectsTableProps = {
   projects: Project[];
@@ -17,20 +17,22 @@ export function ProjectsTable({ projects, total }: ProjectsTableProps) {
 
   return (
     <section className="border-line bg-surface rounded-card border p-6">
-      <h2 className="text-fg text-lg font-bold">Wszystkie projekty</h2>
-      <p className="text-fg-muted mt-1 text-[13px]">{total} projektów</p>
+      <h2 className="text-fg text-lg font-bold">All projects</h2>
+      <p className="text-fg-muted mt-1 text-[13px]">
+        {total} {total === 1 ? "project" : "projects"}
+      </p>
 
       <div className="mt-7 flex items-center gap-4">
         <SearchInput
-          placeholder="Szukaj projektu…"
-          aria-label="Szukaj projektu"
+          placeholder="Search projects…"
+          aria-label="Search projects"
           className="w-full max-w-112.5"
         />
         <select
-          aria-label="Filtruj po statusie"
+          aria-label="Filter by status"
           className="border-line bg-surface text-fg rounded-control h-10.5 w-37.5 border px-4 text-xs"
         >
-          <option value="">Status: Wszystkie</option>
+          <option value="">Status: All</option>
           {Object.entries(PROJECT_STATUS_LABELS).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
@@ -54,7 +56,7 @@ export function ProjectsTable({ projects, total }: ProjectsTableProps) {
               </th>
             ))}
             <th scope="col" className="w-12">
-              <span className="sr-only">Akcje</span>
+              <span className="sr-only">Actions</span>
             </th>
           </tr>
         </thead>
@@ -67,7 +69,7 @@ export function ProjectsTable({ projects, total }: ProjectsTableProps) {
 
       <div className="mt-4 flex items-center justify-between">
         <p className="text-fg-muted text-xs">
-          Wyświetlono 1–{projects.length} z {total}
+          Showing 1–{projects.length} of {total}
         </p>
         <Pagination currentPage={1} totalPages={totalPages} />
       </div>
