@@ -54,7 +54,7 @@ class MinioClient:
             key,
         )
 
-        return key
+        return f"{bucket}/{key}"
 
     def delete_file(self, bucket: str, key: str) -> None:
         self.client.delete_object(

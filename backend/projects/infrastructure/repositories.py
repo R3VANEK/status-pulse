@@ -60,9 +60,12 @@ class DjangoProjectAttachmentRepository(ProjectAttachmentRepository):
         """delete attachment by its id and project id and return number of deleted rows"""
 
         # TODO: complete here the query for check user in project
-        return models.ProjectAttachment.objects.filter(
+        attachments = models.ProjectAttachment.objects.filter(
             id=attachment_id, project_id=project_id
-        ).delete()[0]
+        )
+        for attachment in attachments:
+            attachment.file.delete(save=False)
+        return attachments.delete()[0]
 
     @staticmethod
     def create(

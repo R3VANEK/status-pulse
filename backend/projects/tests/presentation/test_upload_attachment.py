@@ -1,43 +1,17 @@
-import socket
-from urllib.parse import urlparse
 from uuid import UUID
 
-from botocore.exceptions import ClientError
-from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from integrations.s3 import get_s3_client
 from projects.domain.enums import ProjectStatus
 from projects.infrastructure.factories import ProjectFactory
 from projects.infrastructure.models import ProjectAttachment
+from shared.tests.base import S3BaseTest
 
-
-class UploadAttachmentEndpointS3IntegrationTests(APITestCase):
-    def setUp(self) -> None:
-        self.user = get_user_model().objects.create_user(
-            username="test-user",
-            email="test@example.com",
-            password="password123",
-        )
-        self.client.force_authenticate(self.user)
-        self.project = ProjectFactory(status=ProjectStatus.PLANNED)
-        self.storage = get_s3_client()
-        self._ensure_storage_is_reachable()
-        self._ensure_bucket_exists("projects")
-        self.created_file_names: list[str] = []
-
-    def tearDown(self) -> None:
-        for file_name in self.created_file_names:
-            try:
-                bucket, key = file_name.split("/", 1)
-                self.storage.delete_file(bucket=bucket, key=key)
-            except Exception:
-                pass
-        super().tearDown()
+class UploadAttachmentEndpointS3IntegrationTests(APITestCase, S3BaseTest):
 
     def get_url(self, project_id: UUID) -> str:
         return reverse(
@@ -45,29 +19,7 @@ class UploadAttachmentEndpointS3IntegrationTests(APITestCase):
             kwargs={"project_uuid": project_id},
         )
 
-    def _ensure_storage_is_reachable(self) -> None:
-        endpoint = settings.S3_ENDPOINT_URL
-        parsed = urlparse(endpoint)
-        host = parsed.hostname or "localhost"
-        port = parsed.port or (443 if parsed.scheme == "https" else 80)
-        try:
-            with socket.create_connection((host, port), timeout=5):
-                pass
-        except OSError as error:
-            self.fail(
-                f"S3 endpoint {endpoint} is not reachable ({error}). "
-                "Start the storage with `docker compose -f docker-compose.test.yaml up -d s3`."
-            )
-
-    def _ensure_bucket_exists(self, bucket_name: str) -> None:
-        try:
-            self.storage.client.create_bucket(Bucket=bucket_name)
-        except ClientError as exc:
-            code = exc.response.get("Error", {}).get("Code")
-            if code not in {"BucketAlreadyOwnedByYou", "BucketAlreadyExists"}:
-                raise
-
-    def test_uploads_attachment_to_real_s3(self) -> None:
+    def test_uploads_attachment(self) -> None:
         uploaded = SimpleUploadedFile(
             "report.pdf",
             b"%PDF-1.4 test-content",
@@ -89,7 +41,7 @@ class UploadAttachmentEndpointS3IntegrationTests(APITestCase):
 
         self.assertEqual(attachment.content_type, "application/pdf")
         self.assertEqual(attachment.content_size, len(b"%PDF-1.4 test-content"))
-        self.assertTrue(attachment.file.storage.exists(attachment.file.name))
+        self.assert_s3_file_exists(attachment.file.name)
         with attachment.file.open("rb") as stored_file:
             self.assertEqual(stored_file.read(), b"%PDF-1.4 test-content")
 
