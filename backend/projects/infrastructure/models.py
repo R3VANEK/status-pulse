@@ -6,7 +6,6 @@ from shared.infrastructure.models import Attachment
 
 
 class Project(models.Model):
-
     ProjectStatusChoices = models.TextChoices(
         "ProjectStatusChoices",
         [(status.name, status.value) for status in ProjectStatus],
@@ -29,7 +28,6 @@ class Project(models.Model):
 
 
 class ProjectAttachment(Attachment):
-
     @property
     def instance_hash(self) -> str:
         return str(self.project_id)  # type: ignore

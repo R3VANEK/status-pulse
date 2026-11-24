@@ -48,9 +48,7 @@ class DeleteAttachmentEndpointS3IntegrationTests(APITestCase, S3BaseTest):
         self.assert_s3_file_exists(file_name)
         self.assert_s3_file_exists(other_file_name)
 
-        response = self.client.delete(
-            self.get_url(self.project.id, attachment.id)
-        )
+        response = self.client.delete(self.get_url(self.project.id, attachment.id))
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
         self.assertFalse(ProjectAttachment.objects.filter(id=attachment.id).exists())

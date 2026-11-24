@@ -11,8 +11,8 @@ from projects.infrastructure.factories import ProjectFactory
 from projects.infrastructure.models import ProjectAttachment
 from shared.tests.base import S3BaseTest
 
-class UploadAttachmentEndpointS3IntegrationTests(APITestCase, S3BaseTest):
 
+class UploadAttachmentEndpointS3IntegrationTests(APITestCase, S3BaseTest):
     def get_url(self, project_id: UUID) -> str:
         return reverse(
             "project-attachments-general",

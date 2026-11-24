@@ -12,11 +12,12 @@ from projects.infrastructure.factories import ProjectFactory, ProjectAttachmentF
 from integrations.s3 import get_s3_client  # noqa: E402
 from django.conf import settings  # noqa: E402
 from accounts.infrastructure.models import User  # noqa: E402
-from projects.infrastructure.models import Project, ProjectAttachment
-from django.core.files.uploadedfile import SimpleUploadedFile
+from projects.infrastructure.models import Project # noqa: E402
+from django.core.files.uploadedfile import SimpleUploadedFile # noqa: E402
 
 
-NO_ATTACHMENT_PER_PROJECT = (0,4)
+NO_ATTACHMENT_PER_PROJECT = (0, 4)
+
 
 def populate_s3() -> None:
 
@@ -66,12 +67,16 @@ def populate_db() -> None:
 
     for project in Project.objects.all():
         for _ in range(random.randrange(*NO_ATTACHMENT_PER_PROJECT)):
-            created_project_attachments+=1
-            ProjectAttachmentFactory(save_to_s3=True, project=project, file=SimpleUploadedFile(
-                name=f"mocked-{str(uuid4())[:4]}.txt",
-                content_type="text/plain",
-                content=b"hello there general kenobi"
-            ),)
+            created_project_attachments += 1
+            ProjectAttachmentFactory(
+                save_to_s3=True,
+                project=project,
+                file=SimpleUploadedFile(
+                    name=f"mocked-{str(uuid4())[:4]}.txt",
+                    content_type="text/plain",
+                    content=b"hello there general kenobi",
+                ),
+            )
 
     print(f"Created admin {admin.email}")
     print("Created 50 programs.")

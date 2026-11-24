@@ -31,7 +31,6 @@ class RepositoryExceptionWrapper(ABCMeta):
     def __new__(cls, name, bases, namespace):
 
         for attr_name, attr in namespace.items():
-
             if isinstance(attr, staticmethod):
                 namespace[attr_name] = staticmethod(
                     RepositoryExceptionWrapper.exception_wrapper(attr.__func__)

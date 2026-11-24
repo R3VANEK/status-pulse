@@ -48,7 +48,7 @@ class UseCase(BaseUseCase):
             raise ProjectNotFoundException()
 
         attachment = project.get_attachment(id=command.attachment_id)
-        
+
         if attachment.id is None:
             raise RuntimeError()
 

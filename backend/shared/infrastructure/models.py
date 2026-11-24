@@ -4,8 +4,8 @@ from django.db import models
 from django.core.files.storage import Storage
 from integrations.s3 import get_s3_client
 from django.core.files import File
-from abc import ABC, abstractmethod
-from typing import ClassVar, Any
+from abc import abstractmethod
+from typing import Any
 from django.utils.deconstruct import deconstructible
 
 
@@ -26,7 +26,6 @@ def instance_hash_path(instance: models.Model, filename: str):
 
 @deconstructible
 class S3Storage(Storage):
-
     def _split_filename(self, name: str) -> tuple[str, str]:
         """since name is path like eg. projects/123-123-123/foo.txt we split bucket info (projects), from filename"""
         name = name.strip()
@@ -58,7 +57,6 @@ class S3Storage(Storage):
 
 
 class S3FileField(models.FileField):
-
     def __init__(self, verbose_name=None, name=None, **kwargs) -> None:
         kwargs.setdefault("upload_to", instance_hash_path)
         kwargs.setdefault("storage", S3Storage())
@@ -70,7 +68,6 @@ class S3FileField(models.FileField):
 
 
 class Attachment(models.Model):
-
     class Meta:
         abstract = True
 
