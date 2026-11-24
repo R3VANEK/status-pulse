@@ -36,22 +36,21 @@ class RegistrationEndpointTests(APITestCase):
 
     def test_error_mapping(self) -> None:
         cases = [
-            (InvalidEmailException("not-an-email"), "email"),
-            (EmailAlreadyTakenException("jan@example.com"), "email"),
-            (WeakPasswordException(["Too short."]), "password"),
+            InvalidEmailException("not-an-email"),
+            EmailAlreadyTakenException("jan@example.com"),
+            WeakPasswordException(["Too short."]),
         ]
-        for error, field in cases:
+        for error in cases:
             with self.subTest(error=type(error).__name__):
                 with patch(USE_CASE, side_effect=error):
                     response = self.client.post(URL, PAYLOAD, format="json")
 
                 self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-                self.assertIn("details", response.data)
-                self.assertIn(field, response.data["errors"])
+                self.assertEqual(response.data, {"details": str(error)})
 
         with self.subTest(error="unexpected"):
             with patch(USE_CASE, side_effect=RuntimeError("database exploded")):
-                with self.assertLogs("accounts.presentation.views", level="ERROR"):
+                with self.assertLogs("exceptions", level="ERROR"):
                     response = self.client.post(URL, PAYLOAD, format="json")
 
             self.assertEqual(
@@ -66,4 +65,4 @@ class RegistrationEndpointTests(APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertIn("details", response.data)
-            self.assertEqual(set(response.data["errors"]), {"email", "password"})
+            self.assertIn("required", response.data["details"])

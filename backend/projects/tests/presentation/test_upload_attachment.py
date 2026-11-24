@@ -88,7 +88,7 @@ class UploadAttachmentEndpointValidationTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("file type '.exe' is not allowed", response.data["details"])
 
-    def test_rejects_file_name_with_slash(self) -> None:
+    def test_sanitizes_file_name_with_slash(self) -> None:
         uploaded = SimpleUploadedFile(
             "bad/name.pdf",
             b"content",
@@ -101,8 +101,12 @@ class UploadAttachmentEndpointValidationTests(APITestCase):
             format="multipart",
         )
 
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("cannot contain slashes", response.data["details"])
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data["file_name"], "name.pdf")
+        self.assertNotIn("/", response.data["file_name"])
+
+        attachment = ProjectAttachment.objects.get(id=response.data["id"])
+        attachment.file.delete(save=False)
 
     def test_rejects_too_long_file_name(self) -> None:
         uploaded = SimpleUploadedFile(
