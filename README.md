@@ -13,10 +13,19 @@ Simple web application fro managing teams and tasks. Made as a team project for 
 
 ### How to setup
 
-
 1. Go to project root folder and hit `make setup`. It creates venv, makes `.env` compile requirements and install pre-commit
 2. Execute `make start` it should start containers
 3. Execute `make populate` to load some initial data
+
+### TODO
+
+- corelation_id to non-transparent errors
+- prometheus + sentry monitoring
+- kubernetes deploy config
+- rate limiting
+- nginx setup
+- drf-spectacular better docs about endpoints
+- api versioning
 
 ## Authors
 

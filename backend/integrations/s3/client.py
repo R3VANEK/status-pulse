@@ -2,6 +2,10 @@ import boto3
 from botocore.client import Config
 from django.conf import settings
 from threading import Lock
+from django.core.files import File
+from django.core.files.base import ContentFile
+from typing import Any
+from botocore.exceptions import ClientError
 
 
 class MinioClient:
@@ -32,6 +36,47 @@ class MinioClient:
                         region_name="us-east-1",
                     )
         return self._client
+
+    def get_file(self, bucket: str, key: str) -> File:
+
+        response = self.client.get_object(Bucket=bucket, Key=key)
+
+        file_content = response["Body"].read()
+
+        return ContentFile(file_content, name=key)
+
+    def save_file(self, bucket: str, key: str, content: Any) -> str:
+        content.seek(0)
+
+        self.client.upload_fileobj(
+            content,
+            bucket,
+            key,
+        )
+
+        return f"{bucket}/{key}"
+
+    def delete_file(self, bucket: str, key: str) -> None:
+        self.client.delete_object(
+            Bucket=bucket,
+            Key=key,
+        )
+
+    def exists_file(self, bucket: str, key: str) -> bool:
+        try:
+            self.client.head_object(
+                Bucket=bucket,
+                Key=key,
+            )
+            return True
+
+        except ClientError as exc:
+            error_code = exc.response["Error"]["Code"]
+
+            if error_code in ("404", "NoSuchKey", "NotFound"):
+                return False
+
+            raise
 
     def delete_all_objects(self, bucket_name: str) -> int:
 

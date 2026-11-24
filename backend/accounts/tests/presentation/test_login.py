@@ -9,7 +9,7 @@ from accounts.infrastructure.models import User as UserModel
 
 URL = "/api/auth/login"
 PAYLOAD = {"email": "jan@example.com", "password": "Very-Strong-Pass-1"}
-USE_CASE = "accounts.presentation.views.LoginUserUseCase.execute"
+USE_CASE = "accounts.presentation.views.log_in_user.UseCase.execute"
 
 
 class LoginEndpointTests(APITestCase):
@@ -35,7 +35,7 @@ class LoginEndpointTests(APITestCase):
 
         with self.subTest(error="unexpected"):
             with patch(USE_CASE, side_effect=RuntimeError("database exploded")):
-                with self.assertLogs("accounts.presentation.views", level="ERROR"):
+                with self.assertLogs("exceptions", level="ERROR"):
                     response = self.client.post(URL, PAYLOAD, format="json")
 
             self.assertEqual(
@@ -49,4 +49,4 @@ class LoginEndpointTests(APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertIn("details", response.data)
-            self.assertEqual(set(response.data["errors"]), {"email", "password"})
+            self.assertIn("required", response.data["details"])

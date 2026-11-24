@@ -1,6 +1,6 @@
 /venv
 /.env
-
+staticfiles
 __pycache__/
 *.pyc
 ./mypy_cache/

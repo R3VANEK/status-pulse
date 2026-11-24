@@ -112,3 +112,207 @@ MinIO ships with a browser based console for browsing buckets and uploading, dow
 - S3 API: http://localhost:9000
 
 Log in with the `MINIO_ROOT_USER` / `MINIO_ROOT_PASSWORD` values from `.env`
+
+## 7. Writing an endpoint
+
+This section describes the end-to-end flow for adding a backend endpoint, using the project attachment delete flow as a reference (`ProjectAttachmentDetailView.delete`).
+
+### 7.1. Layer responsibilities
+
+An endpoint change usually touches all four layers:
+
+| Layer | Responsibility | Typical location |
+| --- | --- | --- |
+| Domain | Business rules, entities, value objects, domain exceptions | `<app>/domain/` |
+| Application | Use case orchestration, command/response DTOs, repository interfaces (ports) | `<app>/application/` |
+| Infrastructure | Django ORM models, repository implementations, external integrations | `<app>/infrastructure/` |
+| Presentation | DRF views, serializers, URL routing, domain-to-HTTP exception mapping | `<app>/presentation/` |
+
+Dependencies point inward: presentation depends on application/domain, application depends on domain and interfaces, infrastructure implements application interfaces.
+
+### 7.2. Define or update domain behavior
+
+Put business rules in domain entities or domain services, not in views.
+
+- **Entities** (`domain/entities.py`) hold state and behavior. For example, `Project.delete_attachment()` validates that the project is not completed, finds the attachment, removes it from the aggregate, and returns it.
+- **Domain exceptions** (`domain/exceptions.py`) extend `shared.domain.exceptions.DomainException` and represent business failures such as `ProjectNotFoundException`, `ProjectAttachmentNotFoundException`, or `ClosedProjectException`.
+
+```py
+class ProjectAttachmentNotFoundException(DomainException):
+    """Raised when no project attachment was found."""
+
+    def __init__(self):
+        super().__init__("Specified project attachment was not found")
+```
+
+### 7.3. Define application interfaces
+
+Declare repository ports in `application/interfaces.py`. Use cases depend on these abstractions, not on Django models.
+
+- Inherit from `ABC` and use `RepositoryExceptionWrapper` as the metaclass.
+- Declare methods as `@staticmethod @abstractmethod` when the repository is used as a static implementation.
+- Include `_to_entity(...)` for mapping ORM models to domain entities.
+
+```py
+class ProjectAttachmentRepository(ABC, metaclass=RepositoryExceptionWrapper):
+    @staticmethod
+    @abstractmethod
+    def delete(actor_id: UUID, project_id: UUID, attachment_id: UUID) -> int:
+        """Delete attachment and return number of deleted rows."""
+```
+
+### 7.4. Implement the use case
+
+Create one use case module per operation, e.g. `application/use_cases/delete_attachment.py`.
+
+- **Command**: input DTO. Inherit from `shared.application.use_cases.base.Command`. Use `@dataclass(frozen=True, slots=True)`.
+- **ResponseDTO**: output DTO. Inherit from `shared.application.use_cases.base.ResponseDTO`.
+- **UseCase**: inherit from `shared.application.use_cases.base.UseCase` and implement `execute(command)`.
+
+The use case should orchestrate domain objects and repositories. It should not depend on DRF request/response objects.
+
+```py
+@dataclass(frozen=True, slots=True)
+class Command(BaseCommand):
+    actor_id: UUID
+    project_id: UUID
+    attachment_id: UUID
+
+
+@dataclass(frozen=True, slots=True)
+class ResponseDTO(BaseResponseDTO):
+    objects_deleted_count: int
+
+
+class UseCase(BaseUseCase):
+    def __init__(
+        self,
+        attachments: type[ProjectAttachmentRepository],
+        projects: type[ProjectRepository],
+    ) -> None:
+        self._attachments = attachments
+        self._projects = projects
+
+    def execute(self, command: Command) -> ResponseDTO:
+        project = self._projects.get(
+            actor_id=command.actor_id, project_id=command.project_id
+        )
+        if project is None:
+            raise ProjectNotFoundException()
+
+        attachment_to_delete = project.delete_attachment(id=command.attachment_id)
+        objects_deleted_count = self._attachments.delete(
+            actor_id=command.actor_id,
+            project_id=project.id,
+            attachment_id=attachment_to_delete.id,
+        )
+        return ResponseDTO(objects_deleted_count=objects_deleted_count)
+```
+
+### 7.5. Implement infrastructure
+
+Implement the repository interface in `infrastructure/repositories.py`.
+
+- Query Django ORM models.
+- Convert ORM models to domain entities through `_to_entity(...)`.
+- Keep ORM details out of domain and application layers.
+- Repository methods wrapped by `RepositoryExceptionWrapper` convert unexpected failures into `RepositoryException`.
+
+```py
+class DjangoProjectAttachmentRepository(ProjectAttachmentRepository):
+    @staticmethod
+    def delete(actor_id: UUID, project_id: UUID, attachment_id: UUID) -> int:
+        return models.ProjectAttachment.objects.filter(
+            id=attachment_id, project_id=project_id
+        ).delete()[0]
+```
+
+When adding persistence fields, update `infrastructure/models.py` and create/apply Django migrations.
+
+### 7.6. Add presentation layer
+
+#### View
+
+The DRF view translates HTTP to a command and delegates to the use case.
+
+- Parse and validate input. Use DRF serializers for request bodies when the endpoint accepts payload data.
+- Build a command from validated data and path/auth context.
+- Instantiate the use case with concrete repositories.
+- Execute the use case and return a `Response` with an explicit status code.
+
+```py
+class ProjectAttachmentDetailView(APIView):
+    def delete(
+        self,
+        request: Request,
+        project_id: UUID,
+        attachment_id: UUID,
+        *args: Any,
+        **kwargs: Any,
+    ) -> Response:
+        command = delete_attachment.Command(
+            actor_id=request.user.id,
+            project_id=project_id,
+            attachment_id=attachment_id,
+        )
+        use_case = delete_attachment.UseCase(
+            projects=DjangoProjectRepository,
+            attachments=DjangoProjectAttachmentRepository,
+        )
+        use_case.execute(command)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+```
+
+#### URL routing
+
+Register the view in `<app>/presentation/urls.py` and make sure the app is included under `/api/` in `statusPulse/urls.py`.
+
+```py
+path(
+    "<uuid:project_id>/attachments/<uuid:attachment_id>",
+    view=views.ProjectAttachmentDetailView.as_view(),
+    name="project-attachments-detail",
+)
+```
+
+#### Exception mapping
+
+Map domain exceptions to HTTP status codes in `<app>/presentation/exceptions.py`:
+
+```py
+EXCEPTION_MAPPER: Final[dict[BaseException, int]] = {
+    domain_exceptions.ProjectNotFoundException: status.HTTP_404_NOT_FOUND,
+    domain_exceptions.ProjectAttachmentNotFoundException: status.HTTP_404_NOT_FOUND,
+}
+```
+
+Register the app mapper in `statusPulse/exceptions.py` by importing it and merging it into `ALL_EXCEPTION_MAPPER`. The custom DRF exception handler returns domain errors as:
+
+```json
+{
+  "details": "Specified project attachment was not found"
+}
+```
+
+For serializer validation errors handled directly in views, follow the existing project convention and return `details` (and `errors` when field-level details are needed).
+
+### 7.7. Tests
+
+Add tests at the layer where the behavior belongs:
+
+- **Domain tests** (`<app>/tests/domain/`): entity rules and state transitions.
+- **Application tests** (`<app>/tests/application/`): use case orchestration, usually with fake repositories/interfaces.
+- **Presentation tests** (`<app>/tests/presentation/`): API contract, status codes, and response payloads.
+
+Presentation tests should use realistic URLs via `reverse(...)`, assert HTTP status codes, and assert the error payload shape.
+
+```py
+url = reverse(
+    "project-attachments-detail",
+    kwargs={"project_id": project_id, "attachment_id": attachment_id},
+)
+response = self.client.delete(url)
+
+self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+self.assertEqual(response.data.get("details"), "Specified project was not found")
+```

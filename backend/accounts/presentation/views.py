@@ -1,7 +1,6 @@
 import logging
 from typing import Any
 
-from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
@@ -9,24 +8,10 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from accounts.application.interfaces import TokenPair
-from accounts.application.use_cases.log_in_user import (
-    LoginUserUseCase,
-    LoginUserCommand,
-)
-from accounts.application.use_cases.refresh_tokens import (
-    RefreshTokensUseCase,
-    RefreshTokensCommand,
-)
-from accounts.application.use_cases.register_user import (
-    RegisterUserUseCase,
-    RegisterUserCommand,
-)
-from accounts.domain.exceptions import (
-    EmailAlreadyTakenException,
-    InvalidCredentialsException,
-    InvalidEmailException,
-    InvalidTokenException,
-    WeakPasswordException,
+from accounts.application.use_cases import (
+    log_in_user,
+    refresh_tokens,
+    register_user,
 )
 from accounts.infrastructure.password_policy import DjangoPasswordPolicy
 from accounts.infrastructure.repositories import DjangoUserRepository
@@ -73,121 +58,72 @@ class PublicAPIView(APIView):
 
 
 class RegistrationView(PublicAPIView):
-    @extend_schema(
-        request=CredentialsSerializer,
-        responses={
-            201: TokenPairSerializer,
-            400: OpenApiResponse(
-                description="Invalid email, email already taken or weak password."
-            ),
-            500: OpenApiResponse(description="Unexpected server error."),
-        },
-    )
     def post(self, request: Request) -> Response:
         serializer = CredentialsSerializer(data=request.data)
+
         if not serializer.is_valid():
-            return _error_response(
-                INVALID_REQUEST_DETAILS,
-                status.HTTP_400_BAD_REQUEST,
-                serializer.errors,
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"details": serializer.error_messages},
             )
 
-        use_case = RegisterUserUseCase(
+        use_case = register_user.UseCase(
             users=DjangoUserRepository(),
             password_policy=DjangoPasswordPolicy(),
             tokens=SimpleJwtTokenService(),
         )
-        command = RegisterUserCommand(
+        command = register_user.Command(
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
         )
 
-        try:
-            tokens = use_case.execute(command)
-        except (InvalidEmailException, EmailAlreadyTakenException) as error:
-            return _error_response(
-                str(error), status.HTTP_400_BAD_REQUEST, {"email": [str(error)]}
-            )
-        except WeakPasswordException as error:
-            return _error_response(
-                "Password is too weak.",
-                status.HTTP_400_BAD_REQUEST,
-                {"password": error.reasons},
-            )
-        except Exception:
-            return _unexpected_error_response()
+        tokens = use_case.execute(command)
 
-        return _tokens_response(tokens, status.HTTP_201_CREATED)
+        return Response(
+            TokenPairSerializer(tokens).data, status=status.HTTP_201_CREATED
+        )
 
 
 class LoginView(PublicAPIView):
-    @extend_schema(
-        request=CredentialsSerializer,
-        responses={
-            200: TokenPairSerializer,
-            400: OpenApiResponse(description="Missing or invalid fields."),
-            401: OpenApiResponse(description="Invalid email or password."),
-            500: OpenApiResponse(description="Unexpected server error."),
-        },
-    )
     def post(self, request: Request) -> Response:
+
         serializer = CredentialsSerializer(data=request.data)
+
         if not serializer.is_valid():
-            return _error_response(
-                INVALID_REQUEST_DETAILS,
-                status.HTTP_400_BAD_REQUEST,
-                serializer.errors,
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"details": serializer.error_messages},
             )
 
-        use_case = LoginUserUseCase(
+        use_case = log_in_user.UseCase(
             users=DjangoUserRepository(), tokens=SimpleJwtTokenService()
         )
-        command = LoginUserCommand(
+        command = log_in_user.Command(
             email=serializer.validated_data["email"],
             password=serializer.validated_data["password"],
         )
 
-        try:
-            tokens = use_case.execute(command)
-        except InvalidCredentialsException as error:
-            return _error_response(str(error), status.HTTP_401_UNAUTHORIZED)
-        except Exception:
-            return _unexpected_error_response()
+        tokens = use_case.execute(command)
 
-        return _tokens_response(tokens, status.HTTP_200_OK)
+        return Response(TokenPairSerializer(tokens).data, status=status.HTTP_200_OK)
 
 
 class RefreshView(PublicAPIView):
-    @extend_schema(
-        request=RefreshSerializer,
-        responses={
-            200: TokenPairSerializer,
-            400: OpenApiResponse(description="Missing refresh field."),
-            401: OpenApiResponse(
-                description="Refresh token is invalid, expired or already used."
-            ),
-            500: OpenApiResponse(description="Unexpected server error."),
-        },
-    )
     def post(self, request: Request) -> Response:
+
         serializer = RefreshSerializer(data=request.data)
+
         if not serializer.is_valid():
-            return _error_response(
-                INVALID_REQUEST_DETAILS,
-                status.HTTP_400_BAD_REQUEST,
-                serializer.errors,
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST,
+                data={"details": serializer.error_messages},
             )
 
-        use_case = RefreshTokensUseCase(tokens=SimpleJwtTokenService())
-        command = RefreshTokensCommand(
+        use_case = refresh_tokens.UseCase(tokens=SimpleJwtTokenService())
+        command = refresh_tokens.Command(
             refresh_token=serializer.validated_data["refresh"]
         )
 
-        try:
-            tokens = use_case.execute(command)
-        except InvalidTokenException as error:
-            return _error_response(str(error), status.HTTP_401_UNAUTHORIZED)
-        except Exception:
-            return _unexpected_error_response()
+        tokens = use_case.execute(command)
 
-        return _tokens_response(tokens, status.HTTP_200_OK)
+        return Response(TokenPairSerializer(tokens).data, status=status.HTTP_200_OK)

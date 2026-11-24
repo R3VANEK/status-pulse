@@ -2,6 +2,7 @@ from uuid import uuid4
 from django.db import models
 from django.utils import timezone
 from projects.domain.enums import ProjectStatus
+from shared.infrastructure.models import Attachment
 
 
 class Project(models.Model):
@@ -24,3 +25,25 @@ class Project(models.Model):
                 condition=models.Q(deadline__gte=models.F("created_at")),
             ),
         ]
+
+
+class ProjectAttachment(Attachment):
+    @property
+    def instance_hash(self) -> str:
+        return str(self.project_id)  # type: ignore
+
+    @property
+    def bucket_name(self) -> str:
+        return "projects"
+
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid4,
+        editable=False,
+    )
+
+    project = models.ForeignKey(
+        to=Project,
+        related_name="attachments",
+        on_delete=models.CASCADE,
+    )

@@ -17,3 +17,27 @@ class IllegalProjectStateTransitionException(DomainException):
         super().__init__(
             f"Transition from project's current status of {current_status} to {desired_status} is illegal"
         )
+
+
+class ProjectNotFoundException(DomainException):
+    """Raised when no project was found."""
+
+    def __init__(self):
+        super().__init__("Specified project was not found")
+
+
+class ProjectAttachmentNotFoundException(DomainException):
+    """Raised when no project attachment was found."""
+
+    def __init__(self):
+        super().__init__("Specified project attachment was not found")
+
+
+class ClosedProjectException(DomainException):
+    def __init__(self, action: str) -> None:
+        super().__init__(f"Action {action} is prohibited on closed project")
+
+
+class InvalidProjectAttachmentException(DomainException):
+    def __init__(self, reason: str) -> None:
+        super().__init__(f"Invalid project attachment: {reason}")

@@ -11,7 +11,7 @@ from accounts.infrastructure.models import User as UserModel
 
 REGISTRATION_URL = "/api/auth/registration"
 URL = "/api/auth/refresh"
-USE_CASE = "accounts.presentation.views.RefreshTokensUseCase.execute"
+USE_CASE = "accounts.presentation.views.refresh_tokens.UseCase.execute"
 
 
 class RefreshEndpointTests(APITestCase):
@@ -57,7 +57,7 @@ class RefreshEndpointTests(APITestCase):
 
         with self.subTest(error="unexpected"):
             with patch(USE_CASE, side_effect=RuntimeError("database exploded")):
-                with self.assertLogs("accounts.presentation.views", level="ERROR"):
+                with self.assertLogs("exceptions", level="ERROR"):
                     response = self.client.post(URL, payload, format="json")
 
             self.assertEqual(
@@ -71,4 +71,4 @@ class RefreshEndpointTests(APITestCase):
 
             self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
             self.assertIn("details", response.data)
-            self.assertIn("refresh", response.data["errors"])
+            self.assertIn("required", response.data["details"])
