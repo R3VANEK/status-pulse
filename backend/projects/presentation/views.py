@@ -2,12 +2,18 @@ import logging
 from typing import Any
 from uuid import UUID, uuid4
 
+from django.http import HttpResponse
+from django.utils.http import content_disposition_header
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from projects.application.use_cases import delete_attachment, upload_attachment
+from projects.application.use_cases import (
+    delete_attachment,
+    download_attachment,
+    upload_attachment,
+)
 from projects.domain.value_objects import MAX_ATTACHMENT_FILE_SIZE_BYTES
 from projects.infrastructure.repositories import (
     DjangoProjectAttachmentRepository,
@@ -71,13 +77,35 @@ class ProjectAttachmentDetailView(APIView):
     def get(
         self,
         request: Request,
-        project_uuid: UUID,
-        attachment_uuid: UUID,
+        project_id: UUID,
+        attachment_id: UUID,
         *args: Any,
         **kwargs: Any,
-    ) -> Response:
-        """downloads the attachment as a file"""
-        ...
+    ) -> HttpResponse:
+        """Downloads the attachment as a file."""
+
+        command = download_attachment.Command(
+            actor_id=request.user.id,
+            project_id=project_id,
+            attachment_id=attachment_id,
+        )
+        use_case = download_attachment.UseCase(
+            projects=DjangoProjectRepository,
+            attachments=DjangoProjectAttachmentRepository,
+        )
+        result = use_case.execute(command)
+
+        response = HttpResponse(
+            result.file.content,
+            content_type=result.file.content_type or "application/octet-stream",
+        )
+        disposition = content_disposition_header(
+            as_attachment=True, filename=result.file.name
+        )
+        if disposition:
+            response["Content-Disposition"] = disposition
+
+        return response
 
     def delete(
         self,

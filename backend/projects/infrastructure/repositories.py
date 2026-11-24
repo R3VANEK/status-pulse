@@ -56,6 +56,19 @@ class DjangoProjectRepository(ProjectRepository):
 
 class DjangoProjectAttachmentRepository(ProjectAttachmentRepository):
     @staticmethod
+    def get(project_id: UUID, attachment_id: UUID) -> entities.ProjectAttachment | None:  # type: ignore
+        """get attachment by project id and its id"""
+
+        try:
+            attachment = models.ProjectAttachment.objects.get(
+                id=attachment_id, project_id=project_id
+            )
+        except models.ProjectAttachment.DoesNotExist:
+            return None
+
+        return DjangoProjectAttachmentRepository._to_entity(attachment)
+
+    @staticmethod
     def delete(actor_id: UUID, project_id: UUID, attachment_id: UUID) -> int:  # type: ignore
         """delete attachment by its id and project id and return number of deleted rows"""
 
@@ -87,12 +100,15 @@ class DjangoProjectAttachmentRepository(ProjectAttachmentRepository):
     @staticmethod
     def _to_entity(model: models.ProjectAttachment) -> entities.ProjectAttachment:
         """Parse orm-like object to domain entity"""
+        with model.file.open("rb") as stored_file:
+            content = stored_file.read()
+
         return entities.ProjectAttachment(
             id=model.id,
             upload_date=model.upload_date,
             file=File(
                 name=model.file_name,
-                content=model.file.file,
+                content=content,
                 content_type=model.content_type,
                 content_size=model.content_size,
             ),

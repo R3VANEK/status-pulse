@@ -64,19 +64,23 @@ class Project:
         self.attachments.append(attachment)
         return attachment
 
+    def get_attachment(self, id: UUID) -> ProjectAttachment:
+        """Returns the attachment with the given id."""
+
+        attachment = next((obj for obj in self.attachments if obj.id == id), None)
+
+        if attachment is None:
+            raise exceptions.ProjectAttachmentNotFoundException
+
+        return attachment
+
     def delete_attachment(self, id: UUID) -> ProjectAttachment:
         "Removes and returns deleted attachment."
 
         if self.status == ProjectStatus.COMPLETED:
             raise exceptions.ClosedProjectException(action="deleting attachment")
 
-        deleted_attachment = next(
-            (obj for obj in self.attachments if obj.id == id), None
-        )
-
-        if not deleted_attachment:
-            raise exceptions.ProjectAttachmentNotFoundException
-
+        deleted_attachment = self.get_attachment(id=id)
         self.attachments.remove(deleted_attachment)
 
         return deleted_attachment
