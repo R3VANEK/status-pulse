@@ -73,7 +73,7 @@ The domain layer contains the core business logic of the app: entities, value ob
 
 ### Use case
 
-A use case encapsulates a single application-level operation, such as creating or listing a program. It orchestrates the domain objects and depends on repository interfaces, applying the Dependency Inversion Principle (DIP) by interfaces. The use case should have its own dedicated command to ingest the payload from the outside world, keeping it decoupled from the web/API layer.
+A use case encapsulates a single application-level operation, such as creating or listing a project. It orchestrates the domain objects and depends on repository interfaces, applying the Dependency Inversion Principle (DIP) by interfaces. The use case should have its own dedicated command to ingest the payload from the outside world, keeping it decoupled from the web/API layer.
 
 ### Interfaces
 
@@ -121,12 +121,12 @@ This section describes the end-to-end flow for adding a backend endpoint, using 
 
 An endpoint change usually touches all four layers:
 
-| Layer | Responsibility | Typical location |
-| --- | --- | --- |
-| Domain | Business rules, entities, value objects, domain exceptions | `<app>/domain/` |
-| Application | Use case orchestration, command/response DTOs, repository interfaces (ports) | `<app>/application/` |
-| Infrastructure | Django ORM models, repository implementations, external integrations | `<app>/infrastructure/` |
-| Presentation | DRF views, serializers, URL routing, domain-to-HTTP exception mapping | `<app>/presentation/` |
+| Layer          | Responsibility                                                               | Typical location        |
+| -------------- | ---------------------------------------------------------------------------- | ----------------------- |
+| Domain         | Business rules, entities, value objects, domain exceptions                   | `<app>/domain/`         |
+| Application    | Use case orchestration, command/response DTOs, repository interfaces (ports) | `<app>/application/`    |
+| Infrastructure | Django ORM models, repository implementations, external integrations         | `<app>/infrastructure/` |
+| Presentation   | DRF views, serializers, URL routing, domain-to-HTTP exception mapping        | `<app>/presentation/`   |
 
 Dependencies point inward: presentation depends on application/domain, application depends on domain and interfaces, infrastructure implements application interfaces.
 

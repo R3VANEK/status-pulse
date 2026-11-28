@@ -12,11 +12,11 @@ from django.utils import timezone
 from factory.django import DjangoModelFactory
 from faker import Factory as FakerFactory
 
-from projects.infrastructure.models import Project, ProjectAttachment
+from projects.infrastructure.models import Project, ProjectAttachment, ProjectMembership
 from shared.infrastructure.models import instance_hash_path
-
+from accounts.infrastructure.factories import UserFactory
 faker = FakerFactory.create()
-
+from django.contrib.auth.models import Group
 
 class ProjectFactory(DjangoModelFactory[Project]):
     class Meta:
@@ -35,6 +35,20 @@ class ProjectFactory(DjangoModelFactory[Project]):
     )
 
     status = factory.LazyFunction(lambda: choice(list(Project.ProjectStatusChoices)))
+
+class ProjectMembershipFactory(DjangoModelFactory[ProjectMembership]):
+
+    class Meta:
+        model = ProjectMembership
+
+    user = factory.SubFactory(UserFactory)
+    project = factory.SubFactory(ProjectFactory)
+    group = factory.LazyFunction(
+        lambda: choice(list(Group.objects.all()))
+        if Group.objects.exists()
+        else None
+    )
+
 
 
 def _read_source_file(source: Any) -> tuple[bytes, str, str]:

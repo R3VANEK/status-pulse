@@ -3,7 +3,8 @@ from django.db import models
 from django.utils import timezone
 from projects.domain.enums import ProjectStatus
 from shared.infrastructure.models import Attachment
-
+from accounts.infrastructure.models import User
+from django.contrib.auth.models import Group, Permission
 
 class Project(models.Model):
     ProjectStatusChoices = models.TextChoices(
@@ -24,6 +25,10 @@ class Project(models.Model):
                 name="project_deadline_after_creation",
                 condition=models.Q(deadline__gte=models.F("created_at")),
             ),
+        ]
+
+        permissions = [
+            ("add_new_person", "Can add new person to the project"),
         ]
 
 
@@ -47,3 +52,20 @@ class ProjectAttachment(Attachment):
         related_name="attachments",
         on_delete=models.CASCADE,
     )
+
+
+class ProjectMembership(models.Model):
+
+    user = models.ForeignKey(
+        to=User, on_delete=models.CASCADE, related_name="project_memberships"
+    )
+    project = models.ForeignKey(
+        to=Project, on_delete=models.CASCADE, related_name="members"
+    )
+    group = models.ForeignKey(to=Group, on_delete=models.SET_NULL, null=True)
+
+    def has_perm(self, permission: str) -> bool:
+        if not self.group:
+            return False
+
+        return self.group.permissions.filter(name__iexact=permission).count() != 0

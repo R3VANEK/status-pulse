@@ -7,7 +7,7 @@ from django.contrib.auth.models import (
 )
 from django.db import models
 from django.utils import timezone
-
+from uuid import uuid4
 
 class UserManager(BaseUserManager["User"]):
     """Creates users identified by email instead of username."""
@@ -34,6 +34,9 @@ class UserManager(BaseUserManager["User"]):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
+
+    id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, unique=True)
     first_name = models.CharField(max_length=150)

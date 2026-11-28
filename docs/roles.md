@@ -14,5 +14,7 @@ They are project-scoped, meaning user can be supervisor in project A and student
 | editing task                  | [v]     | [v]        |
 | completing task               | [x]     | [v]        |
 | adding attachments to task    | [v]     | [v]        |
-| adding attachments to project | [v]     | [v]        |
+| adding project attachments    | [v]     | [v]        |
+| deleting project attachments  | [v]     | [v]        |
+| getting project attachments   | [v]     | [v]        |
 | chat                          | [v]     | [v]        |
